@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-bg-primary: #080d15;
+  --color-bg-secondary: #111a27;
+  --color-bg-tertiary: #172235;
+  --color-border: #263449;
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #a6b4c8;
+  --color-text-muted: #6f8097;
+  --color-accent-green: #32d583;
+  --color-accent-green-dim: #146c43;
+  --color-accent-amber: #f59e0b;
+  --color-accent-amber-dim: #92400e;
+  --color-accent-red: #ef4444;
+  --color-accent-red-dim: #991b1b;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+html {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 74% -10%, rgba(29, 145, 93, 0.16), transparent 30rem),
+    radial-gradient(circle at 8% 105%, rgba(35, 78, 130, 0.12), transparent 32rem),
+    #080d15;
+  color: #f1f5f9;
+  min-height: 100vh;
+}
+
+/* Keep layout utilities in control: dashboard components provide their own spacing. */
+#root {
+  min-width: 0;
+}
+
+::selection {
+  background: rgba(50, 213, 131, 0.28);
+  color: #fff;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #111a27;
+}
+::-webkit-scrollbar-thumb {
+  background: #2b3b51;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #425874;
+}
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid #22c55e;
+  outline-offset: 2px;
+}
