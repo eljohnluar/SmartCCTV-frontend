@@ -24,6 +24,10 @@ api.interceptors.response.use(
   }
 )
 
+// ── Authentication ────────────────────────────────────────────────────────────
+export const loginUser = (data) => api.post('/auth/login', data)
+export const registerUser = (data) => api.post('/auth/register', data)
+
 // ── Students ──────────────────────────────────────────────────────────────────
 
 export const getStudents = (params) => api.get('/students', { params })
@@ -41,6 +45,7 @@ export const enrollFace = (formData) =>
 export const getTodayAttendance = () => api.get('/attendance/today')
 export const getAttendanceByDate = (date) => api.get(`/attendance/date/${date}`)
 export const markAttendanceManual = (data) => api.post('/attendance/manual', data)
+export const resetAttendance = () => api.post('/attendance/reset')
 
 // ── Reports ───────────────────────────────────────────────────────────────────
 
@@ -55,10 +60,23 @@ export const exportReportPDF = (params) =>
 
 export const getAlerts = (params) => api.get('/alerts', { params })
 export const updateAlert = (id, data) => api.put(`/alerts/${id}`, data)
+export const resetAlerts = () => api.post('/alerts/reset')
 
 // ── System ────────────────────────────────────────────────────────────────────
 
 export const getSystemStatus = () => api.get('/system/status')
 export const setAttendanceRecording = (enabled) => api.post('/camera/attendance-recording', { enabled })
+export const testVoiceAnnouncement = () => api.post('/camera/test-voice')
+export const getUniformPolicy = () => api.get('/settings/uniform-policy')
+export const updateUniformPolicy = (uniform_colors) => api.put('/settings/uniform-policy', { uniform_colors })
+export const getVoiceSettings = () => api.get('/settings/voice')
+export const updateVoiceSettings = (voice_gender) => api.put('/settings/voice', { voice_gender })
+export const getGestureAttendanceSettings = () => api.get('/settings/gesture-attendance')
+export const updateGestureAttendanceSettings = (gesture_attendance_enabled) =>
+  api.put('/settings/gesture-attendance', { gesture_attendance_enabled })
+export const getRuntimeControls = () => api.get('/settings/runtime-controls')
+export const updateRuntimeControls = (data) => api.put('/settings/runtime-controls', data)
+export const getScheduleSettings = () => api.get('/settings/schedule')
+export const updateScheduleSettings = (data) => api.put('/settings/schedule', data)
 
 export default api

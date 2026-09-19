@@ -28,7 +28,6 @@ export const API_ROUTES = {
 // Attendance status options
 export const ATTENDANCE_STATUS = {
   PRESENT: 'present',
-  ABSENT: 'absent',
   LATE: 'late',
 }
 

@@ -1,7 +1,7 @@
 import { Camera, Check, Video, X } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
-import { enrollFace } from '../../services/api'
+import { enrollFace, getGestureAttendanceSettings } from '../../services/api'
 import Modal from '../common/Modal'
 
 const SETTINGS_STORAGE_KEY = 'smartcctv.settings'
@@ -33,6 +33,7 @@ export default function FaceEnrollment({ open, onClose, student }) {
   const [sourceError, setSourceError] = useState('')
   const [captures, setCaptures] = useState({})
   const [enrolling, setEnrolling] = useState(false)
+  const [gestureRequired, setGestureRequired] = useState(false)
 
   const activeStep = CAPTURE_STEPS.find((step) => !captures[step.id])
   const captureCount = Object.keys(captures).length
@@ -43,6 +44,9 @@ export default function FaceEnrollment({ open, onClose, student }) {
       setCameraSource(readEnrollmentCamera())
       setSourceError('')
       setCaptures({})
+      getGestureAttendanceSettings()
+        .then((data) => setGestureRequired(Boolean(data.gesture_attendance_enabled)))
+        .catch(() => setGestureRequired(false))
     }
   }, [open])
 
@@ -145,7 +149,7 @@ export default function FaceEnrollment({ open, onClose, student }) {
           <>
             <div className="rounded-lg bg-emerald-400/10 px-3 py-2 text-center">
               <p className="text-sm font-medium text-emerald-200">{activeStep.label}</p>
-              <p className="mt-0.5 text-xs text-emerald-300/75">{activeStep.instruction}</p>
+              <p className="mt-0.5 text-xs text-emerald-300/75">{activeStep.instruction}{gestureRequired ? ' Keep an open palm visible beside your face.' : ''}</p>
             </div>
             <div className="relative flex aspect-video items-center justify-center overflow-hidden rounded-xl bg-[#0f1117]">
               {!streaming && <div className="px-5 text-center text-slate-600">{sourceError ? <p className="text-sm text-red-300">{sourceError}</p> : <><Camera size={32} className="mx-auto mb-2" /><p className="text-sm">Camera not started</p></>}</div>}
@@ -156,7 +160,7 @@ export default function FaceEnrollment({ open, onClose, student }) {
           </>
         )}
 
-        {isComplete && <p className="rounded-lg bg-green-500/10 px-3 py-2 text-center text-sm text-green-300">All four angles are ready. Review or retake a capture before enrolling.</p>}
+        {isComplete && <p className="rounded-lg bg-green-500/10 px-3 py-2 text-center text-sm text-green-300">All four angles are ready. Review or retake a capture before enrolling{gestureRequired ? '—each image must include an open palm' : ''}.</p>}
 
         <div className="grid grid-cols-4 gap-2">
           {CAPTURE_STEPS.map((step) => (

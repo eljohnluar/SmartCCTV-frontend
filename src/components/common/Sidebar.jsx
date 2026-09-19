@@ -7,9 +7,11 @@ import {
   Settings,
   Shield,
   Users,
+  LogOut,
 } from 'lucide-react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { useApp } from '../../context/AppContext'
+import { useAuth } from '../../context/AuthContext'
 
 const navItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -21,6 +23,8 @@ const navItems = [
 
 export default function Sidebar() {
   const { sidebarOpen, toggleSidebar } = useApp()
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
 
   return (
     <aside
@@ -42,7 +46,7 @@ export default function Sidebar() {
         {sidebarOpen && (
           <div className="overflow-hidden max-lg:hidden">
             <p className="whitespace-nowrap text-sm font-semibold leading-tight text-white">SmartCCTV</p>
-            <p className="whitespace-nowrap text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">Security operations</p>
+            <p className="whitespace-nowrap text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">AI-Powered System</p>
           </div>
         )}
       </div>
@@ -83,15 +87,36 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* System badge */}
-      {sidebarOpen && (
-        <div className="border-t border-[#263449] px-4 py-4 max-lg:hidden">
-          <div className="flex items-center gap-2 text-slate-500">
-            <Shield size={12} />
-            <span className="text-[10px] font-medium uppercase tracking-[0.1em]">Secure workspace</span>
+      {/* System badge & Teacher profile */}
+      <div className="border-t border-[#263449] p-3 space-y-2">
+        {sidebarOpen && (
+          <div className="flex items-center justify-between px-2 max-lg:hidden">
+            <div className="flex items-center gap-2 text-slate-400 font-mono">
+              <Shield size={12} className="text-cyan-400" />
+              <span className="text-[10px] font-bold tracking-wider text-cyan-300 uppercase">
+                {user ? user.username : 'TEACHER CONSOLE'}
+              </span>
+            </div>
+            <span className="rounded bg-cyan-500/10 px-1.5 py-0.5 font-mono text-[9px] font-bold text-cyan-300">
+              TEACHER
+            </span>
           </div>
-        </div>
-      )}
+        )}
+
+        {user && (
+          <button
+            onClick={async () => {
+              await logout()
+              navigate('/login')
+            }}
+            title="Sign out of Teacher console"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/10 hover:text-red-300"
+          >
+            <LogOut size={16} className="shrink-0" />
+            {sidebarOpen && <span className="max-lg:hidden font-mono text-[11px]">Sign Out</span>}
+          </button>
+        )}
+      </div>
 
       {/* Collapse toggle */}
       <button

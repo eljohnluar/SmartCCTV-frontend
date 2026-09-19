@@ -42,7 +42,6 @@ export default function AttendanceTable({ records, loading }) {
             >
               <option value="all">All</option>
               <option value="present">Present</option>
-              <option value="absent">Absent</option>
               <option value="late">Late</option>
             </select>
           </div>

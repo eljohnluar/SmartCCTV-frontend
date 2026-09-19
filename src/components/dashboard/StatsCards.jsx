@@ -1,4 +1,4 @@
-import { TrendingDown, TrendingUp, UserCheck, UserMinus, Users } from 'lucide-react'
+import { Clock, TrendingDown, TrendingUp, UserCheck, Users } from 'lucide-react'
 
 const cards = [
   {
@@ -18,18 +18,18 @@ const cards = [
     color: 'text-green-400',
     bg: 'bg-green-500/10',
     getValue: (s) => s.present,
-    sub: (s) => `${s.late} late`,
-    subColor: () => 'text-amber-400',
+    sub: (s) => s.late > 0 ? `${s.late} late check-ins` : 'All on time',
+    subColor: () => 'text-emerald-400',
   },
   {
-    key: 'absent',
-    label: 'Absent Today',
-    icon: UserMinus,
-    color: 'text-red-400',
-    bg: 'bg-red-500/10',
-    getValue: (s) => s.absent,
-    sub: () => 'Unexcused',
-    subColor: () => 'text-slate-500',
+    key: 'late',
+    label: 'Late Today',
+    icon: Clock,
+    color: 'text-amber-400',
+    bg: 'bg-amber-500/10',
+    getValue: (s) => s.late,
+    sub: (s) => s.late > 0 ? `${s.late} past 30m grace` : 'None today',
+    subColor: () => 'text-amber-400',
   },
   {
     key: 'total',

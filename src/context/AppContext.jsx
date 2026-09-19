@@ -30,6 +30,7 @@ function reducer(state, action) {
     case 'SET_ATTENDANCE_RECORDING':
       return { ...state, attendanceRecording: action.payload }
     case 'ADD_NOTIFICATION':
+      if (state.notifications.some((notification) => notification.id === action.payload.id)) return state
       return {
         ...state,
         notifications: [action.payload, ...state.notifications].slice(0, 50),
@@ -83,10 +84,11 @@ export function AppProvider({ children }) {
     })
 
     const unsubAttendance = wsClient.on('attendance', (data) => {
+      const attendanceDate = data.class_date || data.record?.class_date || new Date().toISOString().slice(0, 10)
       dispatch({
         type: 'ADD_NOTIFICATION',
         payload: {
-          id: Date.now(),
+          id: `attendance:${data.student_id}:${attendanceDate}`,
           type: 'attendance',
           message: `${data.student_name} marked ${data.status}`,
           timestamp: new Date().toISOString(),
@@ -94,9 +96,29 @@ export function AppProvider({ children }) {
       })
     })
 
+    const unsubVoice = wsClient.on('voice', (data) => {
+      if (!data.message || data.server_audio || !('speechSynthesis' in window)) return
+      // Browser speech is a fallback when the backend runs as a service or in
+      // a session that cannot access the computer's default audio device.
+      const utterance = new SpeechSynthesisUtterance(data.message)
+      utterance.lang = 'en-US'
+      utterance.rate = 1
+      const gender = data.voice_gender || 'female'
+      const voiceTerms = gender === 'male'
+        ? ['male', 'david', 'mark', 'guy', 'daniel']
+        : ['female', 'zira', 'hazel', 'susan', 'samantha']
+      const matchingVoice = window.speechSynthesis.getVoices().find((voice) =>
+        voiceTerms.some((term) => voice.name.toLowerCase().includes(term))
+      )
+      if (matchingVoice) utterance.voice = matchingVoice
+      utterance.volume = Math.max(0, Math.min(1, Number(data.volume ?? 100) / 100))
+      window.speechSynthesis.speak(utterance)
+    })
+
     return () => {
       unsubAlert()
       unsubAttendance()
+      unsubVoice()
       wsClient.disconnect()
     }
   }, [])

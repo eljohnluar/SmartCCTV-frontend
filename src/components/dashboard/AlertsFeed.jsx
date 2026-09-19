@@ -1,6 +1,7 @@
 import { AlertTriangle, CheckCircle, Shield } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { getAlerts, updateAlert } from '../../services/api'
+import { wsClient } from '../../services/websocket'
 
 const MOCK_ALERTS = [
   { id: 1, type: 'weapon_detected', description: 'Potential weapon detected near entrance', is_resolved: false, created_at: new Date().toISOString() },
@@ -12,7 +13,20 @@ export default function AlertsFeed() {
   const [alerts, setAlerts] = useState([])
 
   useEffect(() => {
-    getAlerts({ limit: 5 }).then(setAlerts).catch(() => setAlerts(MOCK_ALERTS))
+    getAlerts({ limit: 10 }).then(setAlerts).catch(() => setAlerts(MOCK_ALERTS))
+
+    const unsubAlert = wsClient.on('alert', (newAlert) => {
+      setAlerts((prev) => [newAlert, ...prev.filter((a) => a.id !== newAlert.id)])
+    })
+
+    const unsubReset = wsClient.on('alerts_reset', () => {
+      setAlerts([])
+    })
+
+    return () => {
+      unsubAlert()
+      unsubReset()
+    }
   }, [])
 
   const resolve = async (id) => {

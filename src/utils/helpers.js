@@ -53,13 +53,6 @@ export const statusColors = (status) => {
         border: 'border-green-500/30',
         dot: 'bg-green-400',
       }
-    case ATTENDANCE_STATUS.ABSENT:
-      return {
-        bg: 'bg-red-500/10',
-        text: 'text-red-400',
-        border: 'border-red-500/30',
-        dot: 'bg-red-400',
-      }
     case ATTENDANCE_STATUS.LATE:
       return {
         bg: 'bg-amber-500/10',

@@ -1,6 +1,6 @@
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 
-const COLORS = ['#22c55e', '#ef4444', '#f59e0b']
+const COLORS = ['#22c55e', '#f59e0b']
 
 const CustomTooltip = ({ active, payload }) => {
   if (!active || !payload?.length) return null
@@ -15,7 +15,6 @@ const CustomTooltip = ({ active, payload }) => {
 export default function DistributionChart({ data, loading }) {
   const chartData = [
     { name: 'Present', value: data?.present ?? 0 },
-    { name: 'Absent', value: data?.absent ?? 0 },
     { name: 'Late', value: data?.late ?? 0 },
   ]
   if (loading) return (

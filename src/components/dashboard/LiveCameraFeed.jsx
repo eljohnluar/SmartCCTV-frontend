@@ -23,7 +23,6 @@ export default function LiveCameraFeed() {
     try {
       await updateAttendanceRecording(!attendanceRecording)
     } catch (error) {
-      // The API explains when OBS Virtual Camera is not ready.
       toast.error(error.message || 'Could not change attendance recording state')
     } finally {
       setRecordingBusy(false)
@@ -41,7 +40,7 @@ export default function LiveCameraFeed() {
           </div>
           <div>
             <h2 className="text-sm font-semibold text-white">Live camera feed</h2>
-            <p className="text-[11px] text-slate-500">OBS Virtual Camera · Main entrance</p>
+            <p className="text-[11px] text-slate-500">Main entrance</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -66,7 +65,7 @@ export default function LiveCameraFeed() {
           <img
             key={streamKey}
             src={`${streamUrl}?refresh=${streamKey}`}
-            alt="Live OBS Virtual Camera feed"
+            alt="Live camera feed"
             onLoad={() => setStreamReady(true)}
             onError={() => setFailed(true)}
             className="h-full w-full object-cover"
@@ -86,7 +85,7 @@ export default function LiveCameraFeed() {
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center text-slate-500">
             <div className="mb-1 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-800/70"><Camera size={23} /></div>
             <p className="text-sm font-medium text-slate-300">Camera stream is unavailable</p>
-            <p className="max-w-sm text-xs">Confirm OBS Virtual Camera is running and CAMERA_INDEX is correct.</p>
+            <p className="max-w-sm text-xs">Confirm the camera is running and the configured device is available.</p>
             <button onClick={reconnect} className="mt-2 rounded-lg bg-emerald-400/10 px-3 py-2 text-xs font-medium text-emerald-300 transition-colors hover:bg-emerald-400/20">Try reconnecting</button>
           </div>
         )}

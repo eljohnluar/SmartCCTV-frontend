@@ -1,10 +1,20 @@
-import { Bell, RefreshCw } from 'lucide-react'
+import { Bell, RefreshCw, Clock } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useApp } from '../../context/AppContext'
 import { todayLabel } from '../../utils/helpers'
 import { SYSTEM_STATUS } from '../../utils/constants'
 
 export default function Header({ title }) {
   const { systemStatus, cameraActive, aiActive, notifications, unreadCount, markRead, clearNotifications, refreshStatus } = useApp()
+  const [currentTime, setCurrentTime] = useState(new Date())
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  // Format in strict 24-hour time (HH:MM:SS)
+  const time24 = currentTime.toLocaleTimeString('en-GB', { hour12: false })
 
   const statusColor = {
     [SYSTEM_STATUS.ONLINE]: 'text-green-400',
@@ -30,6 +40,12 @@ export default function Header({ title }) {
 
       {/* Right controls */}
       <div className="flex items-center gap-2 sm:gap-4">
+        {/* 24-Hour Time Clock */}
+        <div className="flex items-center gap-1.5 rounded-full border border-[#263449] bg-[#111a27]/80 px-3 py-1.5 font-mono text-xs text-cyan-300 shadow-sm">
+          <Clock size={13} className="text-cyan-400" />
+          <span className="font-semibold tracking-wider">{time24}</span>
+        </div>
+
         {/* System status */}
         <div className="hidden items-center gap-2 rounded-full border border-[#263449] bg-[#111a27]/80 px-3 py-1.5 sm:flex">
           <span className={`w-2 h-2 rounded-full ${statusDot}`} />
@@ -85,7 +101,7 @@ export default function Header({ title }) {
                   <div key={n.id} className="border-b border-[#263449] px-4 py-3 last:border-0">
                     <p className="text-xs text-slate-300">{n.message}</p>
                     <p className="text-[10px] text-slate-600 mt-0.5">
-                      {new Date(n.timestamp).toLocaleTimeString()}
+                      {new Date(n.timestamp).toLocaleTimeString('en-GB', { hour12: false })}
                     </p>
                   </div>
                 ))

@@ -71,7 +71,7 @@ export default function StudentList({ students, loading, onAdd, onEdit, onDelete
                         : 'bg-slate-500/10 text-slate-500 border-slate-500/20'
                     }`}>
                       <span className={`w-1.5 h-1.5 rounded-full ${s.has_face ? 'bg-green-400' : 'bg-slate-600'}`} />
-                      {s.has_face ? 'Enrolled' : 'None'}
+                      {s.has_face ? `Enrolled${s.gesture_enrolled ? ' · Palm' : ''}` : 'None'}
                     </span>
                   </td>
                   <td className="px-5 py-3">
