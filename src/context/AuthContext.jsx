@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { loginUser, registerUser } from '../services/api'
 import supabase from '../services/supabase'
+import AuthLoadingScreen from '../components/common/AuthLoadingScreen'
 
 const AuthContext = createContext(null)
 
@@ -17,6 +18,7 @@ export function AuthProvider({ children }) {
     }
   })
   const [loading, setLoading] = useState(true)
+  const [authTransition, setAuthTransition] = useState(null)
 
   useEffect(() => {
     // Initial verification from local storage
@@ -52,34 +54,51 @@ export function AuthProvider({ children }) {
   }, [])
 
   const login = useCallback(async (username, password) => {
+    let authenticatedUser = null
+    let accessToken = null
+
     try {
       const res = await loginUser({ username, password })
       if (res?.user) {
-        setUser(res.user)
-        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(res.user))
-        if (res.access_token) {
-          localStorage.setItem(TOKEN_STORAGE_KEY, res.access_token)
-        }
-        return res
+        authenticatedUser = res.user
+        accessToken = res.access_token
+      } else {
+        throw new Error('Authentication response did not contain user credentials')
       }
-      throw new Error('Authentication response did not contain user credentials')
     } catch (err) {
       // Support default fallback credentials if backend is momentarily unreachable
       const cleanUser = username.trim().toLowerCase()
       if (cleanUser === 'teacher' && (password === 'password123' || password === 'TEACHER2026')) {
-        const fallback = {
+        authenticatedUser = {
           id: 1,
           username: 'teacher',
           full_name: 'Faculty Instructor',
           role: 'teacher',
           email: 'teacher@smartcctv.edu',
         }
-        setUser(fallback)
-        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(fallback))
-        localStorage.setItem(TOKEN_STORAGE_KEY, `local_token_${Date.now()}`)
-        return { user: fallback }
+        accessToken = `local_token_${Date.now()}`
+      } else {
+        throw err
       }
-      throw err
+    }
+
+    if (authenticatedUser) {
+      // Show 3-second futuristic cyberpunk loading screen
+      setAuthTransition({
+        type: 'login',
+        message: 'Credentials verified // Loading biometric attendance matrix & RTSP stream...',
+      })
+
+      await new Promise((resolve) => setTimeout(resolve, 3000))
+
+      setUser(authenticatedUser)
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(authenticatedUser))
+      if (accessToken) {
+        localStorage.setItem(TOKEN_STORAGE_KEY, accessToken)
+      }
+
+      setAuthTransition(null)
+      return { user: authenticatedUser, access_token: accessToken }
     }
   }, [])
 
@@ -98,17 +117,35 @@ export function AuthProvider({ children }) {
     })
 
     if (res?.user) {
+      // Show 3-second futuristic cyberpunk loading screen
+      setAuthTransition({
+        type: 'register',
+        message: 'Registration authorized // Allocating security clearance and provisioning session...',
+      })
+
+      await new Promise((resolve) => setTimeout(resolve, 3000))
+
       setUser(res.user)
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(res.user))
       if (res.access_token) {
         localStorage.setItem(TOKEN_STORAGE_KEY, res.access_token)
       }
+
+      setAuthTransition(null)
       return res
     }
     throw new Error('Registration failed: no user data returned')
   }, [])
 
   const logout = useCallback(async () => {
+    // Show 3-second futuristic cyberpunk loading screen
+    setAuthTransition({
+      type: 'logout',
+      message: 'Terminating operational session // Clearing tokens and flushing security cache...',
+    })
+
+    await new Promise((resolve) => setTimeout(resolve, 3000))
+
     try {
       await supabase.auth.signOut().catch(() => {})
     } catch {
@@ -117,11 +154,18 @@ export function AuthProvider({ children }) {
     localStorage.removeItem(USER_STORAGE_KEY)
     localStorage.removeItem(TOKEN_STORAGE_KEY)
     setUser(null)
+    setAuthTransition(null)
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, authTransition, login, register, logout }}>
       {children}
+      {authTransition && (
+        <AuthLoadingScreen
+          type={authTransition.type}
+          message={authTransition.message}
+        />
+      )}
     </AuthContext.Provider>
   )
 }

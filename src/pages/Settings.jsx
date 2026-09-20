@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Camera, Cpu, Volume2, Database, Palette, Save, Check, Hand, FlipHorizontal, ShieldAlert } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Camera, Cpu, Volume2, Palette, Save, Check, Hand, FlipHorizontal, ShieldAlert } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { getGestureAttendanceSettings, getRuntimeControls, getUniformPolicy, getVoiceSettings, updateGestureAttendanceSettings, updateRuntimeControls, updateUniformPolicy, updateVoiceSettings } from '../services/api'
 
@@ -20,7 +21,6 @@ const defaultSettings = {
   weaponDetectionEnabled: true,
   gestureAttendanceEnabled: false,
   uniformColors: [],
-  supabaseUrl: import.meta.env.VITE_SUPABASE_URL || 'https://xyzcompany.supabase.co',
   logLevel: 'INFO',
 }
 
@@ -396,34 +396,18 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* Database & Supabase */}
-        <div className="bg-[#1a1d27] border border-[#2d3148] rounded-xl p-6">
-          <div className="flex items-center gap-3 mb-5">
-            <div className="p-2 rounded-lg bg-green-500/10 text-green-400">
-              <Database size={18} />
-            </div>
-            <div>
-              <h2 className="text-sm font-semibold text-white">Supabase Connection</h2>
-              <p className="text-xs text-slate-500">PostgreSQL, Realtime, and Storage configuration</p>
-            </div>
-          </div>
+        {/* Save button & small clickable Credits link */}
+        <div className="flex items-center justify-between pt-3 border-t border-[#2d3148]/60">
+          <Link
+            to="/credits"
+            className="group inline-flex items-center gap-1.5 font-mono text-[11px] text-slate-500 transition-colors hover:text-cyan-400"
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-slate-600 transition-colors group-hover:bg-cyan-400" />
+            <span className="underline underline-offset-4 decoration-slate-700 transition-colors group-hover:decoration-cyan-400">
+              Credits
+            </span>
+          </Link>
 
-          <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5">
-              Supabase Project URL
-            </label>
-            <input
-              type="text"
-              readOnly
-              value={settings.supabaseUrl}
-              className="w-full px-3 py-2 text-sm bg-[#242836] border border-[#2d3148] rounded-lg text-slate-400 cursor-not-allowed font-mono text-xs"
-            />
-            <p className="text-[11px] text-slate-500 mt-1">Configured in frontend/.env (VITE_SUPABASE_URL)</p>
-          </div>
-        </div>
-
-        {/* Save button */}
-        <div className="flex justify-end pt-2">
           <button
             type="submit"
             disabled={saving}

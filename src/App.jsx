@@ -11,6 +11,7 @@ import Reports from './pages/Reports'
 import Alerts from './pages/Alerts'
 import Settings from './pages/Settings'
 import Landing from './pages/Landing'
+import Credits from './pages/Credits'
 
 function AppLayout() {
   const { user, loading } = useAuth()
@@ -27,7 +28,7 @@ function AppLayout() {
     )
   }
 
-  // If user is not authenticated as Teacher, display the Futuristic Cyberpunk Landing / Auth portal
+  // If user is not authenticated, display the Futuristic Cyberpunk Landing / Auth portal
   if (!user) {
     return <Landing />
   }
@@ -44,6 +45,8 @@ function AppLayout() {
         return 'Security Alerts & Compliance'
       case '/settings':
         return 'System Settings'
+      case '/credits':
+        return 'System Credits & Research Team'
       default:
         return 'SmartCCTV'
     }
@@ -61,6 +64,7 @@ function AppLayout() {
             <Route path="/reports" element={<Reports />} />
             <Route path="/alerts" element={<Alerts />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/credits" element={<Credits />} />
             <Route path="*" element={<Dashboard />} />
           </Routes>
         </main>
@@ -77,6 +81,7 @@ export default function App() {
         <Routes>
           <Route path="/landing" element={<Landing />} />
           <Route path="/login" element={<Landing />} />
+          <Route path="/credits" element={<Credits />} />
           <Route path="/*" element={<AppLayout />} />
         </Routes>
       </AppProvider>

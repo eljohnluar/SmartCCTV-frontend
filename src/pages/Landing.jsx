@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import {
   Shield,
   Lock,
@@ -572,6 +572,29 @@ export default function Landing() {
           </div>
         </div>
       </main>
+
+      {/* ── Minimalist Cyber Footer ────────────────────────────────────────── */}
+      <footer className="relative z-20 border-t border-cyan-500/15 bg-[#040711]/90 px-4 py-6 backdrop-blur-md sm:px-8">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 text-center sm:flex-row sm:text-left">
+          <div className="flex flex-wrap items-center justify-center gap-2 font-mono text-[11px] text-slate-500 sm:justify-start">
+            <span className="text-slate-400">SMART CCTV</span>
+            <span className="text-slate-700">|</span>
+            <span>&copy; {new Date().getFullYear()}</span>
+          </div>
+
+          <div className="flex items-center gap-4 font-mono text-[11px]">
+            <Link
+              to="/credits"
+              className="group inline-flex items-center gap-1.5 text-cyan-400 transition-colors hover:text-cyan-300"
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 transition-transform group-hover:scale-125 group-hover:shadow-[0_0_8px_#00f0ff]" />
+              <span className="tracking-wider uppercase underline underline-offset-4 decoration-cyan-500/40 group-hover:decoration-cyan-400">
+                Credits
+              </span>
+            </Link>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }
