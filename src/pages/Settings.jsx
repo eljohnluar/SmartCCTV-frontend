@@ -122,285 +122,295 @@ export default function Settings() {
   }
 
   return (
-    <div className="max-w-4xl space-y-6">
+    <div className="mx-auto max-w-[1600px] space-y-6 pb-8">
       <form onSubmit={handleSave} className="space-y-6">
-        {/* Camera Integration Card */}
-        <div className="bg-[#1a1d27] border border-[#2d3148] rounded-xl p-6">
-          <div className="flex items-center gap-3 mb-5">
-            <div className="p-2 rounded-lg bg-green-500/10 text-green-400">
-              <Camera size={18} />
-            </div>
-            <div>
-              <h2 className="text-sm font-semibold text-white">Camera &amp; Live Feed</h2>
-              <p className="text-xs text-slate-500">Configure camera device input stream</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">
-                Camera Index / Device ID
-              </label>
-              <input
-                type="number"
-                value={settings.cameraIndex}
-                onChange={(e) => handleChange('cameraIndex', parseInt(e.target.value) || 0)}
-                className="w-full px-3 py-2 text-sm bg-[#242836] border border-[#2d3148] rounded-lg text-slate-200 focus:outline-none focus:border-green-500/50"
-              />
-              <p className="text-[11px] text-slate-500 mt-1">Default 1 is usually a virtual camera device on Windows.</p>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">
-                Target Capture FPS
-              </label>
-              <input
-                type="number"
-                value={settings.cameraFps}
-                onChange={(e) => handleChange('cameraFps', parseInt(e.target.value) || 15)}
-                className="w-full px-3 py-2 text-sm bg-[#242836] border border-[#2d3148] rounded-lg text-slate-200 focus:outline-none focus:border-green-500/50"
-              />
-              <p className="text-[11px] text-slate-500 mt-1">15 FPS recommended for optimal processing balance.</p>
-            </div>
-
-            <div className="sm:col-span-2">
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">
-                Face Enrollment Camera
-              </label>
-              <select
-                value={settings.enrollmentCamera}
-                onChange={(e) => handleChange('enrollmentCamera', e.target.value)}
-                className="w-full px-3 py-2 text-sm bg-[#242836] border border-[#2d3148] rounded-lg text-slate-200 focus:outline-none focus:border-green-500/50"
-              >
-                <option value="webcam">Browser webcam</option>
-                <option value="virtual">Virtual Camera</option>
-              </select>
-              <p className="text-[11px] text-slate-500 mt-1">
-                Browser webcam requests permission. Virtual Camera uses the same live window feed as live monitoring.
-              </p>
-            </div>
-
-            {/* Camera Flip Toggle */}
-            <div className="sm:col-span-2 flex items-center justify-between rounded-lg border border-[#2d3148] bg-[#242836] px-4 py-3">
-              <div className="flex items-center gap-2.5">
-                <FlipHorizontal size={16} className="text-emerald-400" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          {/* ── Left Column: Video Capture & Voice Engine ────────────────────── */}
+          <div className="space-y-6">
+            {/* Camera Integration Card */}
+            <div className="bg-[#1a1d27] border border-[#2d3148] rounded-xl p-6">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="p-2 rounded-lg bg-green-500/10 text-green-400">
+                  <Camera size={18} />
+                </div>
                 <div>
-                  <span className="text-sm text-slate-300">Flip camera horizontally (left ↔ right)</span>
-                  <p className="text-[11px] text-slate-500 mt-0.5">Mirror the live camera feed left to right.</p>
+                  <h2 className="text-sm font-semibold text-white">Camera &amp; Live Feed</h2>
+                  <p className="text-xs text-slate-500">Configure camera device input stream</p>
                 </div>
               </div>
-              <ToggleButton
-                value={settings.cameraFlipHorizontal}
-                onChange={(v) => handleChange('cameraFlipHorizontal', v)}
-              />
-            </div>
-          </div>
-        </div>
 
-        {/* Gesture confirmation */}
-        <div className="bg-[#1a1d27] border border-[#2d3148] rounded-xl p-6">
-          <div className="flex items-center gap-3 mb-5">
-            <div className="p-2 rounded-lg bg-green-500/10 text-green-400"><Hand size={18} /></div>
-            <div>
-              <h2 className="text-sm font-semibold text-white">Hand Gesture Confirmation</h2>
-              <p className="text-xs text-slate-500">Require an open palm when enrolling or re-enrolling a student's face.</p>
-            </div>
-          </div>
-          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-[#2d3148] bg-[#242836] p-4">
-            <input
-              type="checkbox"
-              checked={settings.gestureAttendanceEnabled}
-              onChange={(e) => handleChange('gestureAttendanceEnabled', e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded bg-[#242836] border-[#2d3148] accent-green-500"
-            />
-            <span>
-              <span className="block text-sm text-slate-200">Enroll with open-palm confirmation</span>
-              <span className="mt-1 block text-[11px] text-slate-500">Students enrolled while this is enabled must show an open palm at the live camera before attendance is recorded. Students enrolled without it check in normally.</span>
-            </span>
-          </label>
-        </div>
-
-        {/* Uniform Policy */}
-        <div className="bg-[#1a1d27] border border-[#2d3148] rounded-xl p-6">
-          <div className="flex items-center gap-3 mb-5">
-            <div className="p-2 rounded-lg bg-green-500/10 text-green-400">
-              <Palette size={18} />
-            </div>
-            <div>
-              <h2 className="text-sm font-semibold text-white">Student Uniform Policy</h2>
-              <p className="text-xs text-slate-500">Only enrolled students are checked after face recognition.</p>
-            </div>
-          </div>
-
-          <fieldset>
-            <legend className="block text-xs font-medium text-slate-400 mb-3">Allowed uniform clothing colors</legend>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {[
-                { value: 'dark-blue',  label: 'Dark Blue',  dot: 'bg-blue-900 border border-blue-700' },
-                { value: 'light-blue', label: 'Light Blue', dot: 'bg-blue-400' },
-                { value: 'dark-red',   label: 'Dark Red',   dot: 'bg-red-900 border border-red-700' },
-                { value: 'light-red',  label: 'Light Red',  dot: 'bg-red-400' },
-                { value: 'white',      label: 'White',      dot: 'bg-white' },
-                { value: 'black',      label: 'Black',      dot: 'bg-black border border-slate-600' },
-              ].map((color) => (
-                <label key={color.value} className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#2d3148] bg-[#242836] px-3 py-2.5 text-sm text-slate-300 transition-colors hover:border-green-500/40">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                    Camera Index / Device ID
+                  </label>
                   <input
-                    type="checkbox"
-                    checked={settings.uniformColors.includes(color.value)}
-                    onChange={() => toggleUniformColor(color.value)}
-                    className="h-4 w-4 rounded bg-[#242836] border-[#2d3148] accent-green-500"
+                    type="number"
+                    value={settings.cameraIndex}
+                    onChange={(e) => handleChange('cameraIndex', parseInt(e.target.value) || 0)}
+                    className="w-full px-3 py-2 text-sm bg-[#242836] border border-[#2d3148] rounded-lg text-slate-200 focus:outline-none focus:border-green-500/50"
                   />
-                  <span className={`h-3 w-3 rounded-full flex-shrink-0 ${color.dot}`} />
-                  {color.label}
-                </label>
-              ))}
-            </div>
-            <p className="mt-3 text-[11px] text-slate-500">A recognized enrolled student wearing an unselected color triggers a policy alert and voice announcement. No clothing boxes are shown in the camera feed.</p>
-            {settings.uniformColors.length === 0 && <p className="mt-2 text-[11px] text-amber-300">No colors are allowed yet—every detected clothing color will be treated as a policy violation.</p>}
-          </fieldset>
-        </div>
+                  <p className="text-[11px] text-slate-500 mt-1">Default 1 is usually a virtual camera device on Windows.</p>
+                </div>
 
-        {/* AI & Recognition Parameters */}
-        <div className="bg-[#1a1d27] border border-[#2d3148] rounded-xl p-6">
-          <div className="flex items-center gap-3 mb-5">
-            <div className="p-2 rounded-lg bg-green-500/10 text-green-400">
-              <Cpu size={18} />
-            </div>
-            <div>
-              <h2 className="text-sm font-semibold text-white">AI Detection &amp; Recognition Pipeline</h2>
-              <p className="text-xs text-slate-500">Face recognition matching and threat heuristics</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">
-                Recognition Threshold ({(settings.recognitionThreshold * 100).toFixed(0)}%)
-              </label>
-              <input
-                type="range"
-                min="0.3"
-                max="0.99"
-                step="0.01"
-                value={settings.recognitionThreshold}
-                onChange={(e) => handleChange('recognitionThreshold', parseFloat(e.target.value))}
-                className="w-full accent-green-500"
-              />
-              <div className="flex justify-between text-[11px] text-slate-500 mt-1">
-                <span>0.30 (Permissive)</span>
-                <span>0.45 (Recommended)</span>
-                <span>0.99 (Strict)</span>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">
-                DeepFace Backbone Model
-              </label>
-              <select
-                value={settings.recognitionModel}
-                onChange={(e) => handleChange('recognitionModel', e.target.value)}
-                className="w-full px-3 py-2 text-sm bg-[#242836] border border-[#2d3148] rounded-lg text-slate-200 focus:outline-none focus:border-green-500/50"
-              >
-                <option value="Facenet">Facenet (128-d embeddings)</option>
-                <option value="Facenet512">Facenet-512 (512-d embeddings)</option>
-                <option value="VGG-Face">VGG-Face</option>
-                <option value="ArcFace">ArcFace</option>
-              </select>
-            </div>
-
-            {/* Alert Mode Toggle */}
-            <div className="sm:col-span-2 flex items-center justify-between rounded-lg border border-[#2d3148] bg-[#242836] px-4 py-3">
-              <div className="flex items-center gap-2.5">
-                <ShieldAlert size={16} className={settings.alertModeEnabled ? 'text-red-400' : 'text-slate-500'} />
                 <div>
-                  <span className="text-sm text-slate-300">Security alert mode</span>
-                  <p className="text-[11px] text-slate-500 mt-0.5">Real-time threat detection and security alerts.</p>
+                  <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                    Target Capture FPS
+                  </label>
+                  <input
+                    type="number"
+                    value={settings.cameraFps}
+                    onChange={(e) => handleChange('cameraFps', parseInt(e.target.value) || 15)}
+                    className="w-full px-3 py-2 text-sm bg-[#242836] border border-[#2d3148] rounded-lg text-slate-200 focus:outline-none focus:border-green-500/50"
+                  />
+                  <p className="text-[11px] text-slate-500 mt-1">15 FPS recommended for optimal processing balance.</p>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                    Face Enrollment Camera
+                  </label>
+                  <select
+                    value={settings.enrollmentCamera}
+                    onChange={(e) => handleChange('enrollmentCamera', e.target.value)}
+                    className="w-full px-3 py-2 text-sm bg-[#242836] border border-[#2d3148] rounded-lg text-slate-200 focus:outline-none focus:border-green-500/50"
+                  >
+                    <option value="webcam">Browser webcam</option>
+                    <option value="virtual">Virtual Camera</option>
+                  </select>
+                  <p className="text-[11px] text-slate-500 mt-1">
+                    Browser webcam requests permission. Virtual Camera uses the same live window feed as live monitoring.
+                  </p>
+                </div>
+
+                {/* Camera Flip Toggle */}
+                <div className="sm:col-span-2 flex items-center justify-between rounded-lg border border-[#2d3148] bg-[#242836] px-4 py-3">
+                  <div className="flex items-center gap-2.5">
+                    <FlipHorizontal size={16} className="text-emerald-400" />
+                    <div>
+                      <span className="text-sm text-slate-300">Flip camera horizontally (left ↔ right)</span>
+                      <p className="text-[11px] text-slate-500 mt-0.5">Mirror the live camera feed left to right.</p>
+                    </div>
+                  </div>
+                  <ToggleButton
+                    value={settings.cameraFlipHorizontal}
+                    onChange={(v) => handleChange('cameraFlipHorizontal', v)}
+                  />
                 </div>
               </div>
-              <ToggleButton
-                value={settings.alertModeEnabled}
-                onChange={(v) => handleChange('alertModeEnabled', v)}
-              />
             </div>
-          </div>
-        </div>
 
-        {/* Audio & Announcements */}
-        <div className="bg-[#1a1d27] border border-[#2d3148] rounded-xl p-6">
-          <div className="flex items-center gap-3 mb-5">
-            <div className="p-2 rounded-lg bg-green-500/10 text-green-400">
-              <Volume2 size={18} />
-            </div>
-            <div>
-              <h2 className="text-sm font-semibold text-white">Voice Announcement Engine</h2>
-              <p className="text-xs text-slate-500">Text-to-speech feedback through the system voice</p>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            {/* Announcer On/Off */}
-            <div className="flex items-center justify-between rounded-lg border border-[#2d3148] bg-[#242836] px-4 py-3">
-              <div>
-                <span className="text-sm text-slate-300">Voice announcer</span>
-                <p className="text-[11px] text-slate-500 mt-0.5">Announce attendance check-ins and security alerts aloud.</p>
+            {/* Audio & Announcements */}
+            <div className="bg-[#1a1d27] border border-[#2d3148] rounded-xl p-6">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="p-2 rounded-lg bg-green-500/10 text-green-400">
+                  <Volume2 size={18} />
+                </div>
+                <div>
+                  <h2 className="text-sm font-semibold text-white">Voice Announcement Engine</h2>
+                  <p className="text-xs text-slate-500">Text-to-speech feedback through the system voice</p>
+                </div>
               </div>
-              <ToggleButton
-                value={settings.announcerEnabled}
-                onChange={(v) => handleChange('announcerEnabled', v)}
-              />
+
+              <div className="space-y-4">
+                {/* Announcer On/Off */}
+                <div className="flex items-center justify-between rounded-lg border border-[#2d3148] bg-[#242836] px-4 py-3">
+                  <div>
+                    <span className="text-sm text-slate-300">Voice announcer</span>
+                    <p className="text-[11px] text-slate-500 mt-0.5">Announce attendance check-ins and security alerts aloud.</p>
+                  </div>
+                  <ToggleButton
+                    value={settings.announcerEnabled}
+                    onChange={(v) => handleChange('announcerEnabled', v)}
+                  />
+                </div>
+
+                {/* Volume slider */}
+                <div>
+                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Announcer volume ({settings.announcerVolume}%)</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={settings.announcerVolume}
+                    onChange={(e) => handleChange('announcerVolume', Number(e.target.value))}
+                    disabled={!settings.announcerEnabled}
+                    className="w-full accent-green-500 disabled:opacity-40"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                      Voice Language
+                    </label>
+                    <select
+                      value={settings.voiceLanguage}
+                      onChange={(e) => handleChange('voiceLanguage', e.target.value)}
+                      className="w-full px-3 py-2 text-sm bg-[#242836] border border-[#2d3148] rounded-lg text-slate-200 focus:outline-none focus:border-green-500/50"
+                    >
+                      <option value="en">English (US)</option>
+                      <option value="tl">Filipino (Tagalog)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                      Announcer Voice
+                    </label>
+                    <select
+                      value={settings.voiceGender}
+                      onChange={(e) => handleChange('voiceGender', e.target.value)}
+                      className="w-full px-3 py-2 text-sm bg-[#242836] border border-[#2d3148] rounded-lg text-slate-200 focus:outline-none focus:border-green-500/50"
+                    >
+                      <option value="female">Female</option>
+                      <option value="male">Male</option>
+                    </select>
+                    <p className="text-[11px] text-slate-500 mt-1">Installed voice of selected gender.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Right Column: AI Intelligence & Institutional Policy ─────────── */}
+          <div className="space-y-6">
+            {/* AI & Recognition Parameters */}
+            <div className="bg-[#1a1d27] border border-[#2d3148] rounded-xl p-6">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="p-2 rounded-lg bg-green-500/10 text-green-400">
+                  <Cpu size={18} />
+                </div>
+                <div>
+                  <h2 className="text-sm font-semibold text-white">AI Detection &amp; Recognition Pipeline</h2>
+                  <p className="text-xs text-slate-500">Face recognition matching and threat heuristics</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                    Recognition Threshold ({(settings.recognitionThreshold * 100).toFixed(0)}%)
+                  </label>
+                  <input
+                    type="range"
+                    min="0.3"
+                    max="0.99"
+                    step="0.01"
+                    value={settings.recognitionThreshold}
+                    onChange={(e) => handleChange('recognitionThreshold', parseFloat(e.target.value))}
+                    className="w-full accent-green-500"
+                  />
+                  <div className="flex justify-between text-[11px] text-slate-500 mt-1">
+                    <span>0.30 (Permissive)</span>
+                    <span>0.45 (Rec.)</span>
+                    <span>0.99 (Strict)</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                    DeepFace Backbone Model
+                  </label>
+                  <select
+                    value={settings.recognitionModel}
+                    onChange={(e) => handleChange('recognitionModel', e.target.value)}
+                    className="w-full px-3 py-2 text-sm bg-[#242836] border border-[#2d3148] rounded-lg text-slate-200 focus:outline-none focus:border-green-500/50"
+                  >
+                    <option value="Facenet">Facenet (128-d embeddings)</option>
+                    <option value="Facenet512">Facenet-512 (512-d embeddings)</option>
+                    <option value="VGG-Face">VGG-Face</option>
+                    <option value="ArcFace">ArcFace</option>
+                  </select>
+                </div>
+
+                {/* Alert Mode Toggle */}
+                <div className="sm:col-span-2 flex items-center justify-between rounded-lg border border-[#2d3148] bg-[#242836] px-4 py-3">
+                  <div className="flex items-center gap-2.5">
+                    <ShieldAlert size={16} className={settings.alertModeEnabled ? 'text-red-400' : 'text-slate-500'} />
+                    <div>
+                      <span className="text-sm text-slate-300">Security alert mode</span>
+                      <p className="text-[11px] text-slate-500 mt-0.5">Real-time threat detection and security alerts.</p>
+                    </div>
+                  </div>
+                  <ToggleButton
+                    value={settings.alertModeEnabled}
+                    onChange={(v) => handleChange('alertModeEnabled', v)}
+                  />
+                </div>
+              </div>
             </div>
 
-            {/* Volume slider */}
-            <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">Announcer volume ({settings.announcerVolume}%)</label>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={settings.announcerVolume}
-                onChange={(e) => handleChange('announcerVolume', Number(e.target.value))}
-                disabled={!settings.announcerEnabled}
-                className="w-full accent-green-500 disabled:opacity-40"
-              />
+            {/* Uniform Policy */}
+            <div className="bg-[#1a1d27] border border-[#2d3148] rounded-xl p-6">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="p-2 rounded-lg bg-green-500/10 text-green-400">
+                  <Palette size={18} />
+                </div>
+                <div>
+                  <h2 className="text-sm font-semibold text-white">Student Uniform Policy</h2>
+                  <p className="text-xs text-slate-500">Only enrolled students are checked after face recognition.</p>
+                </div>
+              </div>
+
+              <fieldset>
+                <legend className="block text-xs font-medium text-slate-400 mb-3">Allowed uniform clothing colors</legend>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {[
+                    { value: 'dark-blue',  label: 'Dark Blue',  dot: 'bg-blue-900 border border-blue-700' },
+                    { value: 'light-blue', label: 'Light Blue', dot: 'bg-blue-400' },
+                    { value: 'dark-red',   label: 'Dark Red',   dot: 'bg-red-900 border border-red-700' },
+                    { value: 'light-red',  label: 'Light Red',  dot: 'bg-red-400' },
+                    { value: 'white',      label: 'White',      dot: 'bg-white' },
+                    { value: 'black',      label: 'Black',      dot: 'bg-black border border-slate-600' },
+                  ].map((color) => (
+                    <label key={color.value} className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#2d3148] bg-[#242836] px-3 py-2.5 text-sm text-slate-300 transition-colors hover:border-green-500/40">
+                      <input
+                        type="checkbox"
+                        checked={settings.uniformColors.includes(color.value)}
+                        onChange={() => toggleUniformColor(color.value)}
+                        className="h-4 w-4 rounded bg-[#242836] border-[#2d3148] accent-green-500"
+                      />
+                      <span className={`h-3 w-3 rounded-full flex-shrink-0 ${color.dot}`} />
+                      {color.label}
+                    </label>
+                  ))}
+                </div>
+                <p className="mt-3 text-[11px] text-slate-500">A recognized enrolled student wearing an unselected color triggers a policy alert and voice announcement. No clothing boxes are shown in the camera feed.</p>
+                {settings.uniformColors.length === 0 && <p className="mt-2 text-[11px] text-amber-300">No colors are allowed yet—every detected clothing color will be treated as a policy violation.</p>}
+              </fieldset>
             </div>
 
-            <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">
-                Voice Language
+            {/* Gesture confirmation */}
+            <div className="bg-[#1a1d27] border border-[#2d3148] rounded-xl p-6">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="p-2 rounded-lg bg-green-500/10 text-green-400"><Hand size={18} /></div>
+                <div>
+                  <h2 className="text-sm font-semibold text-white">Hand Gesture Confirmation</h2>
+                  <p className="text-xs text-slate-500">Require an open palm when enrolling or re-enrolling a student's face.</p>
+                </div>
+              </div>
+              <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-[#2d3148] bg-[#242836] p-4">
+                <input
+                  type="checkbox"
+                  checked={settings.gestureAttendanceEnabled}
+                  onChange={(e) => handleChange('gestureAttendanceEnabled', e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded bg-[#242836] border-[#2d3148] accent-green-500"
+                />
+                <span>
+                  <span className="block text-sm text-slate-200">Enroll with open-palm confirmation</span>
+                  <span className="mt-1 block text-[11px] text-slate-500">Students enrolled while this is enabled must show an open palm at the live camera before attendance is recorded. Students enrolled without it check in normally.</span>
+                </span>
               </label>
-              <select
-                value={settings.voiceLanguage}
-                onChange={(e) => handleChange('voiceLanguage', e.target.value)}
-                className="w-full sm:w-64 px-3 py-2 text-sm bg-[#242836] border border-[#2d3148] rounded-lg text-slate-200 focus:outline-none focus:border-green-500/50"
-              >
-                <option value="en">English (US)</option>
-                <option value="tl">Filipino (Tagalog)</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">
-                Announcer Voice
-              </label>
-              <select
-                value={settings.voiceGender}
-                onChange={(e) => handleChange('voiceGender', e.target.value)}
-                className="w-full sm:w-64 px-3 py-2 text-sm bg-[#242836] border border-[#2d3148] rounded-lg text-slate-200 focus:outline-none focus:border-green-500/50"
-              >
-                <option value="female">Female</option>
-                <option value="male">Male</option>
-              </select>
-              <p className="text-[11px] text-slate-500 mt-1">Uses the closest installed voice of the selected gender.</p>
             </div>
           </div>
         </div>
 
-        {/* Save button & small clickable Credits link */}
-        <div className="flex items-center justify-between pt-3 border-t border-[#2d3148]/60">
+        {/* ── Bottom Full-Width Action Bar with Small Credits Link ────────────── */}
+        <div className="flex items-center justify-between rounded-xl border border-[#2d3148] bg-[#1a1d27] p-4 shadow-lg">
           <Link
             to="/credits"
-            className="group inline-flex items-center gap-1.5 font-mono text-[11px] text-slate-500 transition-colors hover:text-cyan-400"
+            className="group inline-flex items-center gap-1.5 font-mono text-xs text-slate-400 transition-colors hover:text-cyan-400"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-slate-600 transition-colors group-hover:bg-cyan-400" />
             <span className="underline underline-offset-4 decoration-slate-700 transition-colors group-hover:decoration-cyan-400">
@@ -411,7 +421,7 @@ export default function Settings() {
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium bg-green-500 text-black rounded-lg hover:bg-green-400 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold bg-green-500 text-black rounded-lg hover:bg-green-400 disabled:opacity-50 transition-colors shadow-[0_0_20px_rgba(34,197,94,0.25)]"
           >
             {saving ? <Check size={16} /> : <Save size={16} />}
             {saving ? 'Saving Changes...' : 'Save Configuration'}
