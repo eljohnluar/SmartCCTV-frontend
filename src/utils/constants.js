@@ -31,24 +31,30 @@ export const ATTENDANCE_STATUS = {
   LATE: 'late',
 }
 
-// Section options
-export const SECTIONS = [
-  'Section A',
-  'Section B',
-  'Section C',
-  'Section D',
-  'Section E',
-]
+// College year levels
+export const YEAR_LEVELS = ['1st Year', '2nd Year', '3rd Year', '4th Year']
 
-// Grade level options
-export const GRADE_LEVELS = [
-  'Grade 7',
-  'Grade 8',
-  'Grade 9',
-  'Grade 10',
-  'Grade 11',
-  'Grade 12',
-]
+// Five lettered sections exist inside every year level
+export const SECTION_LETTERS = ['A', 'B', 'C', 'D', 'E']
+
+export const sectionLabel = (yearLevel, letter) => `${yearLevel} - Section ${letter}`
+
+// Every class the institution can have: 4 year levels x 5 sections
+export const COLLEGE_SECTIONS = YEAR_LEVELS.flatMap((year) => SECTION_LETTERS.map((letter) => sectionLabel(year, letter)))
+
+/**
+ * Sections a teacher may assign students to, from their year levels and letters.
+ * An empty result means the account has no restriction.
+ */
+export function assignableSections(yearLevels, letters) {
+  if (!yearLevels?.length || !letters?.length) return []
+  return yearLevels.flatMap((year) => letters.filter((letter) => SECTION_LETTERS.includes(letter)).map((letter) => sectionLabel(year, letter)))
+}
+
+/** Pull the year level back out of a year-scoped section label. */
+export function yearLevelOfSection(section) {
+  return YEAR_LEVELS.find((year) => (section || '').startsWith(year)) ?? ''
+}
 
 // Alert types
 export const ALERT_TYPES = {

@@ -228,6 +228,13 @@ export default function AttendanceRecognitionOverlay({ recognition }) {
               </p>
             )}
 
+            {/* Section */}
+            {recognition.section && (
+              <p className="mt-1 max-w-full truncate px-4 text-center text-xs tracking-wide text-slate-400">
+                {recognition.section}
+              </p>
+            )}
+
             {/* Futuristic divider */}
             <div
               className="my-5 h-px w-full"

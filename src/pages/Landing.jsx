@@ -58,9 +58,10 @@ export default function Landing() {
 
     setLoading(true)
     try {
-      await login(username.trim(), password)
+      const session = await login(username.trim(), password)
+      const landingRoute = session?.user?.role === 'admin' ? '/admin' : '/'
       toast.success(`Session authenticated: Welcome, ${username}!`)
-      navigate('/')
+      navigate(landingRoute)
     } catch (err) {
       toast.error(err.message || 'Authentication rejected. Check credentials.')
     } finally {
@@ -89,8 +90,8 @@ export default function Landing() {
         registrationCode: registrationCode.trim().toUpperCase(),
         email: email.trim() || `${username.trim().toLowerCase()}@institution.internal`,
       })
-      toast.success('Registration authorized! Entering console...')
-      navigate('/')
+      toast.success('Administrator clearance granted! Entering control console...')
+      navigate('/admin')
     } catch (err) {
       toast.error(err.message || 'Registration rejected.')
     } finally {
@@ -98,10 +99,10 @@ export default function Landing() {
     }
   }
 
-  const quickDemoFill = () => {
-    setUsername('teacher')
+  const quickDemoFill = (role = 'teacher') => {
+    setUsername(role)
     setPassword('password123')
-    toast('Demo credentials loaded', { icon: '⚡' })
+    toast(`${role === 'admin' ? 'Administrator' : 'Teacher'} demo credentials loaded`, { icon: '⚡' })
   }
 
   return (
@@ -179,7 +180,7 @@ export default function Landing() {
             {/* If user is logged in, show direct jump to dashboard */}
             {user && (
               <button
-                onClick={() => navigate('/')}
+                onClick={() => navigate(user.role === 'admin' ? '/admin' : '/')}
                 className="flex items-center gap-2 rounded-lg border border-emerald-500/50 bg-emerald-500/20 px-3 py-1.5 font-mono text-xs font-semibold text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all hover:bg-emerald-500/30 hover:shadow-[0_0_25px_rgba(16,185,129,0.5)]"
               >
                 <span>OPEN CONSOLE</span>
@@ -399,15 +400,24 @@ export default function Landing() {
                     </button>
 
                     {/* Quick Demo Credentials Button */}
-                    <div className="pt-2 flex items-center justify-between font-mono text-[11px] text-slate-500 border-t border-slate-800">
+                    <div className="pt-2 flex items-center justify-between gap-2 font-mono text-[11px] text-slate-500 border-t border-slate-800">
                       <span>Demo credentials:</span>
-                      <button
-                        type="button"
-                        onClick={quickDemoFill}
-                        className="text-cyan-400 hover:underline hover:text-cyan-300"
-                      >
-                        Auto-fill
-                      </button>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => quickDemoFill('teacher')}
+                          className="text-cyan-400 hover:underline hover:text-cyan-300"
+                        >
+                          Teacher
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => quickDemoFill('admin')}
+                          className="text-emerald-400 hover:underline hover:text-emerald-300"
+                        >
+                          Admin
+                        </button>
+                      </div>
                     </div>
                   </form>
                 )}
@@ -471,22 +481,22 @@ export default function Landing() {
                       />
                     </div>
 
-                    {/* Registration Clearance Code (No hardcoded code shown in placeholder!) */}
+                    {/* Administrator Clearance Code (no code revealed in the UI) */}
                     <div className="rounded-xl border border-amber-500/40 bg-amber-950/20 p-3">
                       <label className="flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-wider text-amber-300 mb-1">
                         <KeyRound size={13} className="text-amber-400" />
-                        Registration Code [Required]
+                        Administrator Clearance Code [Required]
                       </label>
                       <input
                         type="text"
                         required
                         value={registrationCode}
                         onChange={(e) => setRegistrationCode(e.target.value)}
-                        placeholder="Enter registration code"
+                        placeholder="Enter administrator code"
                         className="w-full rounded-lg border border-amber-500/50 bg-[#070c18] px-3 py-2 font-mono text-xs uppercase tracking-widest text-amber-200 placeholder-amber-700/60 focus:border-amber-400 focus:outline-none"
                       />
                       <p className="mt-1 text-[10px] font-mono text-slate-400">
-                        Institutional authorization code required to register.
+                        Only administrators register here. Ask an administrator to create a teacher account.
                       </p>
                     </div>
 
@@ -496,7 +506,7 @@ export default function Landing() {
                       className="group relative mt-2 flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl border border-emerald-400 bg-gradient-to-r from-emerald-500 to-cyan-500 py-3 font-mono text-xs font-extrabold uppercase tracking-widest text-slate-950 shadow-[0_0_25px_rgba(16,185,129,0.4)] transition-all hover:shadow-[0_0_35px_rgba(16,185,129,0.7)] hover:brightness-110 disabled:opacity-60"
                     >
                       <span className="relative z-10">
-                        {loading ? 'AUTHORIZING...' : 'AUTHORIZE & REGISTER // ->'}
+                        {loading ? 'AUTHORIZING...' : 'AUTHORIZE ADMINISTRATOR // ->'}
                       </span>
                     </button>
                   </form>

@@ -1,13 +1,23 @@
 import { Edit2, Scan, Search, Trash2, UserPlus } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { useAuth } from '../../context/AuthContext'
+import { assignableSections } from '../../utils/constants'
 import { getInitials } from '../../utils/helpers'
 import LoadingSpinner from '../common/LoadingSpinner'
 
 export default function StudentList({ students, loading, onAdd, onEdit, onDelete, onEnroll }) {
+  const { user } = useAuth()
   const [search, setSearch] = useState('')
   const [sectionFilter, setSectionFilter] = useState('')
 
-  const sections = useMemo(() => [...new Set(students.map((s) => s.section).filter(Boolean))], [students])
+  const sections = useMemo(() => {
+    const scoped = assignableSections(user?.year_levels, user?.sections)
+    const legacy = [...new Set(students.map((s) => s.section).filter(Boolean))]
+    if (scoped.length > 0) {
+      return [...scoped, ...legacy.filter((s) => !scoped.includes(s))]
+    }
+    return legacy
+  }, [students, user?.year_levels, user?.sections])
 
   const filtered = useMemo(() => students.filter((s) => {
     const matchSearch = s.full_name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -44,7 +54,7 @@ export default function StudentList({ students, loading, onAdd, onEdit, onDelete
           <table className="w-full">
             <thead>
               <tr className="border-b border-[#2d3148]">
-                {['Student', 'ID', 'Section', 'Grade', 'Face', 'Actions'].map((h) => (
+                {['Student', 'ID', 'Section', 'Year Level', 'Face', 'Actions'].map((h) => (
                   <th key={h} className="px-5 py-3 text-left text-xs font-medium text-slate-500">{h}</th>
                 ))}
               </tr>

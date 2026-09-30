@@ -27,6 +27,16 @@ api.interceptors.response.use(
 // ── Authentication ────────────────────────────────────────────────────────────
 export const loginUser = (data) => api.post('/auth/login', data)
 export const registerUser = (data) => api.post('/auth/register', data)
+export const getCurrentAccount = () => api.get('/auth/me')
+
+// ── Administrator console ─────────────────────────────────────────────────────
+export const getAdminSummary = () => api.get('/admin/summary')
+export const getTeacherAccounts = (params) => api.get('/admin/teachers', { params })
+export const createTeacherAccount = (data) => api.post('/admin/teachers', data)
+export const updateTeacherAccount = (id, data) => api.put(`/admin/teachers/${id}`, data)
+export const deleteTeacherAccount = (id) => api.delete(`/admin/teachers/${id}`)
+export const getAttendanceOverview = (params) => api.get('/admin/attendance', { params })
+export const getAuditLog = (params) => api.get('/admin/audit-log', { params })
 
 // ── Students ──────────────────────────────────────────────────────────────────
 

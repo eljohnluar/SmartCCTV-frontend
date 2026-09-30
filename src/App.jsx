@@ -1,8 +1,10 @@
-import { Routes, Route, useLocation } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { AppProvider } from './context/AppContext'
 import Sidebar from './components/common/Sidebar'
 import Header from './components/common/Header'
+import AdminSidebar from './components/common/AdminSidebar'
+import AdminHeader from './components/common/AdminHeader'
 import NotificationToast from './components/common/NotificationToast'
 
 import Dashboard from './pages/Dashboard'
@@ -12,6 +14,44 @@ import Alerts from './pages/Alerts'
 import Settings from './pages/Settings'
 import Landing from './pages/Landing'
 import Credits from './pages/Credits'
+import AdminDashboard from './pages/admin/AdminDashboard'
+import TeacherManagement from './pages/admin/TeacherManagement'
+import AdminAttendance from './pages/admin/AdminAttendance'
+import AuditLog from './pages/admin/AuditLog'
+import AdminSettings from './pages/admin/AdminSettings'
+
+const adminTitles = {
+  '/admin': 'Administrator Dashboard',
+  '/admin/teachers': 'Teacher Management',
+  '/admin/attendance': 'Attendance Oversight',
+  '/admin/audit': 'Audit Log',
+  '/admin/settings': 'Administrator Settings',
+  '/credits': 'System Credits & Research Team',
+}
+
+function AdminLayout() {
+  const location = useLocation()
+
+  return (
+    <div className="flex h-screen w-screen overflow-hidden bg-[#080d15] text-[#f1f5f9]">
+      <AdminSidebar />
+      <div className="flex-1 flex flex-col h-full overflow-hidden">
+        <AdminHeader title={adminTitles[location.pathname] ?? 'SmartCCTV Administrator'} />
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-7">
+          <Routes>
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/teachers" element={<TeacherManagement />} />
+            <Route path="/admin/attendance" element={<AdminAttendance />} />
+            <Route path="/admin/audit" element={<AuditLog />} />
+            <Route path="/admin/settings" element={<AdminSettings />} />
+            <Route path="/credits" element={<Credits />} />
+            <Route path="*" element={<Navigate to="/admin" replace />} />
+          </Routes>
+        </main>
+      </div>
+    </div>
+  )
+}
 
 function AppLayout() {
   const { user, loading } = useAuth()
@@ -31,6 +71,10 @@ function AppLayout() {
   // If user is not authenticated, display the Futuristic Cyberpunk Landing / Auth portal
   if (!user) {
     return <Landing />
+  }
+
+  if (user.role === 'admin') {
+    return <AdminLayout />
   }
 
   const getPageTitle = (pathname) => {
@@ -65,6 +109,7 @@ function AppLayout() {
             <Route path="/alerts" element={<Alerts />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/credits" element={<Credits />} />
+            <Route path="/admin/*" element={<Navigate to="/" replace />} />
             <Route path="*" element={<Dashboard />} />
           </Routes>
         </main>

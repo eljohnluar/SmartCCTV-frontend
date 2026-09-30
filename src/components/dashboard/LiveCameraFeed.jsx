@@ -1,20 +1,60 @@
-import { Camera, Maximize2, Pause, Play, Radio, RefreshCw } from 'lucide-react'
-import { useState } from 'react'
+import { Camera, Maximize2, Pause, Play, Radio, RefreshCw, Video } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useApp } from '../../context/AppContext'
+import { readStoredSettings, liveFeedCameraOf } from '../../utils/settings'
 
 const streamUrl = '/api/camera/stream'
 
 export default function LiveCameraFeed() {
   const [streamKey, setStreamKey] = useState(0)
   const [failed, setFailed] = useState(false)
+  const [failReason, setFailReason] = useState('')
   const { cameraActive, attendanceRecording, updateAttendanceRecording } = useApp()
   const [streamReady, setStreamReady] = useState(false)
   const [recordingBusy, setRecordingBusy] = useState(false)
+  const [stored] = useState(readStoredSettings)
+  const videoRef = useRef(null)
+  const streamRef = useRef(null)
+
+  const source = liveFeedCameraOf(stored)
+  const isWebcam = source === 'webcam'
+
+  const stopWebcam = useCallback(() => {
+    streamRef.current?.getTracks().forEach((track) => track.stop())
+    streamRef.current = null
+  }, [])
+
+  const startWebcam = useCallback(async () => {
+    setFailed(false)
+    setFailReason('')
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } })
+      streamRef.current = stream
+      if (videoRef.current) videoRef.current.srcObject = stream
+      setStreamReady(true)
+    } catch {
+      setStreamReady(false)
+      setFailReason('Browser webcam access was denied or no camera is available on this device.')
+      setFailed(true)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!isWebcam) return undefined
+    startWebcam()
+    return stopWebcam
+  }, [isWebcam, startWebcam, stopWebcam])
 
   const reconnect = () => {
-    setFailed(false)
     setStreamReady(false)
+    if (isWebcam) {
+      stopWebcam()
+      startWebcam()
+      return
+    }
+    setFailed(false)
+    setFailReason('')
     setStreamKey((key) => key + 1)
   }
 
@@ -30,22 +70,24 @@ export default function LiveCameraFeed() {
   }
 
   const cameraReady = cameraActive || streamReady
+  const isLive = cameraActive || (isWebcam && streamReady)
+  const mirrored = Boolean(stored.cameraFlipHorizontal)
 
   return (
     <section className="overflow-hidden rounded-3xl border border-[#2b3b51] bg-[#111a27] shadow-[0_20px_55px_rgba(0,0,0,0.22)]">
       <div className="flex items-center justify-between px-5 py-4 sm:px-6">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-400/10 text-emerald-300">
-            <Camera size={17} />
+            {isWebcam ? <Video size={17} /> : <Camera size={17} />}
           </div>
           <div>
             <h2 className="text-sm font-semibold text-white">Live camera feed</h2>
-            <p className="text-[11px] text-slate-500">Main entrance</p>
+            <p className="text-[11px] text-slate-500">Main entrance · {isWebcam ? 'Browser webcam' : 'Virtual camera'}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className={`hidden items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide sm:inline-flex ${cameraActive ? 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300' : 'border-slate-600/40 text-slate-500'}`}>
-            <Radio size={11} className={cameraActive ? 'animate-pulse' : ''} /> {cameraActive ? 'Live' : 'Offline'}
+          <span className={`hidden items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide sm:inline-flex ${isLive ? 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300' : 'border-slate-600/40 text-slate-500'}`}>
+            <Radio size={11} className={isLive ? 'animate-pulse' : ''} /> {isLive ? 'Live' : 'Offline'}
           </span>
           <button
             onClick={toggleAttendanceRecording}
@@ -61,15 +103,26 @@ export default function LiveCameraFeed() {
         </div>
       </div>
       <div className="relative aspect-video overflow-hidden bg-[#080d15] xl:aspect-[16/8]">
-        {!failed && (
-          <img
-            key={streamKey}
-            src={`${streamUrl}?refresh=${streamKey}`}
-            alt="Live camera feed"
-            onLoad={() => setStreamReady(true)}
-            onError={() => setFailed(true)}
-            className="h-full w-full object-cover"
+        {isWebcam ? (
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            onPlay={() => setStreamReady(true)}
+            className={`h-full w-full object-cover ${failed ? 'hidden' : 'block'} ${mirrored ? '-scale-x-100' : ''}`}
           />
+        ) : (
+          !failed && (
+            <img
+              key={streamKey}
+              src={`${streamUrl}?refresh=${streamKey}`}
+              alt="Live camera feed"
+              onLoad={() => setStreamReady(true)}
+              onError={() => { setFailReason(''); setFailed(true) }}
+              className="h-full w-full object-cover"
+            />
+          )
         )}
         {!failed && (
           <>
@@ -84,8 +137,8 @@ export default function LiveCameraFeed() {
         {failed && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center text-slate-500">
             <div className="mb-1 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-800/70"><Camera size={23} /></div>
-            <p className="text-sm font-medium text-slate-300">Camera stream is unavailable</p>
-            <p className="max-w-sm text-xs">Confirm the camera is running and the configured device is available.</p>
+            <p className="text-sm font-medium text-slate-300">Camera feed is unavailable</p>
+            <p className="max-w-sm text-xs">{failReason || 'Confirm the camera is running and the configured device is available.'}</p>
             <button onClick={reconnect} className="mt-2 rounded-lg bg-emerald-400/10 px-3 py-2 text-xs font-medium text-emerald-300 transition-colors hover:bg-emerald-400/20">Try reconnecting</button>
           </div>
         )}

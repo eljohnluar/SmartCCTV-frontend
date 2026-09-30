@@ -3,12 +3,12 @@ import { Link } from 'react-router-dom'
 import { Camera, Cpu, Volume2, Palette, Save, Check, Hand, FlipHorizontal, ShieldAlert } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { getGestureAttendanceSettings, getRuntimeControls, getUniformPolicy, getVoiceSettings, updateGestureAttendanceSettings, updateRuntimeControls, updateUniformPolicy, updateVoiceSettings } from '../services/api'
-
-const SETTINGS_STORAGE_KEY = 'smartcctv.settings'
+import { SETTINGS_STORAGE_KEY } from '../utils/settings'
 
 const defaultSettings = {
   cameraIndex: 1,
   cameraFps: 15,
+  liveFeedCamera: 'virtual',
   enrollmentCamera: 'webcam',
   recognitionThreshold: 0.45,
   recognitionModel: 'Facenet',
@@ -164,6 +164,23 @@ export default function Settings() {
                     className="w-full px-3 py-2 text-sm bg-[#242836] border border-[#2d3148] rounded-lg text-slate-200 focus:outline-none focus:border-green-500/50"
                   />
                   <p className="text-[11px] text-slate-500 mt-1">15 FPS recommended for optimal processing balance.</p>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                    Live Feed Camera
+                  </label>
+                  <select
+                    value={settings.liveFeedCamera}
+                    onChange={(e) => handleChange('liveFeedCamera', e.target.value)}
+                    className="w-full px-3 py-2 text-sm bg-[#242836] border border-[#2d3148] rounded-lg text-slate-200 focus:outline-none focus:border-green-500/50"
+                  >
+                    <option value="virtual">Virtual Camera</option>
+                    <option value="webcam">Browser webcam</option>
+                  </select>
+                  <p className="text-[11px] text-slate-500 mt-1">
+                    Virtual Camera shows the monitored CCTV feed with detections. Browser webcam shows this computer&apos;s camera directly, without overlays.
+                  </p>
                 </div>
 
                 <div className="sm:col-span-2">

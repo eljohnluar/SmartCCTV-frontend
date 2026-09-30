@@ -2,9 +2,9 @@ import { Camera, Check, Video, X } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import { enrollFace, getGestureAttendanceSettings } from '../../services/api'
+import { enrollmentCameraOf, readStoredSettings } from '../../utils/settings'
 import Modal from '../common/Modal'
 
-const SETTINGS_STORAGE_KEY = 'smartcctv.settings'
 const virtualCameraStream = '/api/camera/stream'
 const CAPTURE_STEPS = [
   { id: 'front', label: 'Front', instruction: 'Look straight at the camera.' },
@@ -12,15 +12,6 @@ const CAPTURE_STEPS = [
   { id: 'right', label: 'Turn right', instruction: 'Turn your face slightly to the right.' },
   { id: 'upward', label: 'Look up', instruction: 'Tilt your face slightly upward.' },
 ]
-
-function readEnrollmentCamera() {
-  try {
-    const settings = JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY) || '{}')
-    return settings.enrollmentCamera === 'virtual' ? 'virtual' : 'webcam'
-  } catch {
-    return 'webcam'
-  }
-}
 
 export default function FaceEnrollment({ open, onClose, student }) {
   const videoRef = useRef(null)
@@ -41,7 +32,7 @@ export default function FaceEnrollment({ open, onClose, student }) {
 
   useEffect(() => {
     if (open) {
-      setCameraSource(readEnrollmentCamera())
+      setCameraSource(enrollmentCameraOf(readStoredSettings()))
       setSourceError('')
       setCaptures({})
       getGestureAttendanceSettings()

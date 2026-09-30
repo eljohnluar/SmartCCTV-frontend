@@ -42,7 +42,11 @@ export default function AttendanceLog({ records = [], loading = false }) {
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs font-medium text-slate-200">{record.student_name || 'Unknown student'}</p>
-              <p className="truncate text-[10px] text-slate-500">{record.student_code || record.section || 'Face recognition'}</p>
+              <p className="truncate text-[10px] text-slate-500" title={[record.student_code, record.section].filter(Boolean).join(' - ')}>
+                {record.student_code && record.section
+                  ? `${record.student_code} · ${record.section}`
+                  : record.student_code || record.section || 'Face recognition'}
+              </p>
             </div>
             <div className="shrink-0 text-right">
               <p className="flex items-center justify-end gap-1 text-[10px] font-medium text-emerald-300"><Clock3 size={11} /> {formatTime(record.check_in_time)}</p>

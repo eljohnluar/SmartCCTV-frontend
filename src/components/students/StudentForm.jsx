@@ -1,15 +1,22 @@
 import { Save } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
-import { GRADE_LEVELS, SECTIONS } from '../../utils/constants'
+import { useAuth } from '../../context/AuthContext'
+import { assignableSections, COLLEGE_SECTIONS, yearLevelOfSection } from '../../utils/constants'
 import Modal from '../common/Modal'
 
 const EMPTY = { student_id: '', full_name: '', section: '', grade_level: '', photo_url: '' }
 
 export default function StudentForm({ open, onClose, student, onSave }) {
   const isEdit = !!student
+  const { user } = useAuth()
   const [form, setForm] = useState(student ?? EMPTY)
   const [saving, setSaving] = useState(false)
+
+  const scopedSections = assignableSections(user?.year_levels, user?.sections)
+  const isRestricted = scopedSections.length > 0
+  const allowedSections = isRestricted ? scopedSections : COLLEGE_SECTIONS
+  const isOutsideScope = !!form.section && !allowedSections.includes(form.section)
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }))
 
@@ -21,7 +28,7 @@ export default function StudentForm({ open, onClose, student, onSave }) {
     }
     setSaving(true)
     try {
-      await onSave(form)
+      await onSave({ ...form, grade_level: yearLevelOfSection(form.section) || form.grade_level })
       toast.success(isEdit ? 'Student updated' : 'Student added')
       onClose()
     } catch (err) {
@@ -51,23 +58,20 @@ export default function StudentForm({ open, onClose, student, onSave }) {
           {field('Full Name', 'full_name', 'text', 'e.g. Maria Santos')}
           {field('Student ID', 'student_id', 'text', 'e.g. STU-001')}
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs text-slate-400 mb-1.5">Section</label>
-            <select value={form.section} onChange={(e) => set('section', e.target.value)}
-              className="w-full px-3 py-2 text-sm bg-[#242836] border border-[#2d3148] rounded-lg text-slate-200 focus:outline-none focus:border-green-500/50">
-              <option value="">Select section</option>
-              {SECTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs text-slate-400 mb-1.5">Grade Level</label>
-            <select value={form.grade_level} onChange={(e) => set('grade_level', e.target.value)}
-              className="w-full px-3 py-2 text-sm bg-[#242836] border border-[#2d3148] rounded-lg text-slate-200 focus:outline-none focus:border-green-500/50">
-              <option value="">Select grade</option>
-              {GRADE_LEVELS.map((g) => <option key={g} value={g}>{g}</option>)}
-            </select>
-          </div>
+        <div>
+          <label className="block text-xs text-slate-400 mb-1.5">Section</label>
+          <select value={form.section} onChange={(e) => set('section', e.target.value)}
+            className="w-full px-3 py-2 text-sm bg-[#242836] border border-[#2d3148] rounded-lg text-slate-200 focus:outline-none focus:border-green-500/50">
+            <option value="">Select section</option>
+            {allowedSections.map((s) => <option key={s} value={s}>{s}</option>)}
+            {isOutsideScope && (
+              <option value={form.section}>{`${form.section} (outside your sections)`}</option>
+            )}
+          </select>
+          <p className="mt-1.5 text-xs text-slate-500">Year level is taken from the section.</p>
+          {isRestricted && (
+            <p className="mt-1 text-xs text-slate-600">Showing the sections assigned to your account.</p>
+          )}
         </div>
         {field('Photo URL (optional)', 'photo_url', 'url', 'https://...')}
         <div className="flex justify-end gap-3 pt-2">

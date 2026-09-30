@@ -26,20 +26,21 @@ const MOCK_TREND = [
 ]
 
 const MOCK_RECORDS = [
-  { id: 101, class_date: '2026-09-06', student_name: 'Maria Santos', section: 'Section A', status: 'present', check_in_time: '2026-09-06T07:45:00Z', confidence: 0.98 },
-  { id: 102, class_date: '2026-09-06', student_name: 'Juan Dela Cruz', section: 'Section A', status: 'late', check_in_time: '2026-09-06T08:15:00Z', confidence: 0.92 },
-  { id: 103, class_date: '2026-09-06', student_name: 'Carlos Mendoza', section: 'Section B', status: 'present', check_in_time: '2026-09-06T07:50:00Z', confidence: 0.94 },
-  { id: 104, class_date: '2026-09-06', student_name: 'Ana Reyes', section: 'Section B', status: 'present', check_in_time: '2026-09-06T07:52:00Z', confidence: 0.95 },
-  { id: 105, class_date: '2026-09-06', student_name: 'Miguel Torres', section: 'Section C', status: 'present', check_in_time: '2026-09-06T07:55:00Z', confidence: 0.96 },
-  { id: 106, class_date: '2026-09-06', student_name: 'Elena Garcia', section: 'Section C', status: 'late', check_in_time: '2026-09-06T08:35:00Z', confidence: 0.91 },
-  { id: 107, class_date: '2026-09-06', student_name: 'Sofia Ramos', section: 'Section A', status: 'present', check_in_time: '2026-09-06T07:40:00Z', confidence: 0.99 },
-  { id: 108, class_date: '2026-09-06', student_name: 'Luis Bautista', section: 'Section D', status: 'late', check_in_time: '2026-09-06T08:10:00Z', confidence: 0.89 },
+  { id: 101, class_date: '2026-09-06', student_name: 'Maria Santos', section: '1st Year - Section A', status: 'present', check_in_time: '2026-09-06T07:45:00Z', confidence: 0.98 },
+  { id: 102, class_date: '2026-09-06', student_name: 'Juan Dela Cruz', section: '1st Year - Section A', status: 'late', check_in_time: '2026-09-06T08:15:00Z', confidence: 0.92 },
+  { id: 103, class_date: '2026-09-06', student_name: 'Carlos Mendoza', section: '2nd Year - Section B', status: 'present', check_in_time: '2026-09-06T07:50:00Z', confidence: 0.94 },
+  { id: 104, class_date: '2026-09-06', student_name: 'Ana Reyes', section: '2nd Year - Section C', status: 'present', check_in_time: '2026-09-06T07:52:00Z', confidence: 0.95 },
+  { id: 105, class_date: '2026-09-06', student_name: 'Miguel Torres', section: '3rd Year - Section C', status: 'present', check_in_time: '2026-09-06T07:55:00Z', confidence: 0.96 },
+  { id: 106, class_date: '2026-09-06', student_name: 'Elena Garcia', section: '3rd Year - Section D', status: 'late', check_in_time: '2026-09-06T08:35:00Z', confidence: 0.91 },
+  { id: 107, class_date: '2026-09-06', student_name: 'Sofia Ramos', section: '4th Year - Section A', status: 'present', check_in_time: '2026-09-06T07:40:00Z', confidence: 0.99 },
+  { id: 108, class_date: '2026-09-06', student_name: 'Luis Bautista', section: '4th Year - Section E', status: 'late', check_in_time: '2026-09-06T08:10:00Z', confidence: 0.89 },
 ]
 
 export default function Reports() {
   const [filters, setFilters] = useState({
     dateFrom: toISODate(new Date(Date.now() - 7 * 86400000)),
     dateTo: toISODate(new Date()),
+    yearLevel: '',
     section: '',
   })
   const [summary, setSummary] = useState(MOCK_SUMMARY)

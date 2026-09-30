@@ -39,7 +39,7 @@ export default function ReportTable({ records, loading, onExportCSV }) {
                   <tr key={r.id} className="hover:bg-white/[0.02] transition-colors">
                     <td className="px-5 py-3 text-xs text-slate-400 whitespace-nowrap">{formatDate(r.class_date, { month: 'short', day: 'numeric' })}</td>
                     <td className="px-5 py-3 text-sm text-white font-medium">{r.student_name}</td>
-                    <td className="px-5 py-3 text-xs text-slate-400">{r.section}</td>
+                    <td className="px-5 py-3 text-xs text-slate-400 whitespace-nowrap">{r.section}</td>
                     <td className="px-5 py-3"><Badge status={r.status} /></td>
                     <td className="px-5 py-3 text-xs text-slate-400">{formatTime(r.check_in_time)}</td>
                     <td className="px-5 py-3 text-xs text-slate-400">{r.confidence != null ? `${(r.confidence * 100).toFixed(1)}%` : '—'}</td>

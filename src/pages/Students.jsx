@@ -1,14 +1,22 @@
 import { useState } from 'react'
+import { useAuth } from '../context/AuthContext'
+import { assignableSections } from '../utils/constants'
 import { useStudents } from '../hooks/useStudents'
 import StudentList from '../components/students/StudentList'
 import StudentForm from '../components/students/StudentForm'
 import FaceEnrollment from '../components/students/FaceEnrollment'
 
 export default function Students() {
+  const { user } = useAuth()
   const { students, loading, addStudent, editStudent, removeStudent } = useStudents()
   const [formOpen, setFormOpen] = useState(false)
   const [editingStudent, setEditingStudent] = useState(null)
   const [enrollStudent, setEnrollStudent] = useState(null)
+
+  const scopedSections = assignableSections(user?.year_levels, user?.sections)
+  const scopeSummary = scopedSections.length > 0
+    ? user.year_levels.map((year) => `${year} ${user.sections.join(', ')}`).join(' · ')
+    : ''
 
   const handleAdd = () => {
     setEditingStudent(null)
@@ -40,6 +48,9 @@ export default function Students() {
 
   return (
     <div className="space-y-6">
+      {scopeSummary && (
+        <p className="text-xs text-slate-500 -mb-3">Your sections: {scopeSummary}</p>
+      )}
       <StudentList
         students={students}
         loading={loading}

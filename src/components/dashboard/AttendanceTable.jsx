@@ -80,7 +80,7 @@ export default function AttendanceTable({ records, loading }) {
                       </div>
                     </td>
                     <td className="px-5 py-3 text-xs text-slate-500 font-mono">{r.student_code}</td>
-                    <td className="px-5 py-3 text-xs text-slate-400">{r.section}</td>
+                    <td className="px-5 py-3 text-xs text-slate-400 whitespace-nowrap">{r.section}</td>
                     <td className="px-5 py-3"><Badge status={r.status} /></td>
                     <td className="px-5 py-3 text-xs text-slate-400">{formatTime(r.check_in_time)}</td>
                     <td className="px-5 py-3 text-xs text-slate-400">

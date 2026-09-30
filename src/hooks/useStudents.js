@@ -47,14 +47,14 @@ export function useStudents(filters = {}) {
 
 // Mock data for offline / no-backend mode
 const MOCK_STUDENTS = [
-  { id: 1, student_id: 'STU-001', full_name: 'Maria Santos', section: 'Section A', grade_level: 'Grade 10', has_face: true, photo_url: null },
-  { id: 2, student_id: 'STU-002', full_name: 'Juan Dela Cruz', section: 'Section A', grade_level: 'Grade 10', has_face: true, photo_url: null },
-  { id: 3, student_id: 'STU-003', full_name: 'Ana Reyes', section: 'Section B', grade_level: 'Grade 11', has_face: false, photo_url: null },
-  { id: 4, student_id: 'STU-004', full_name: 'Carlos Mendoza', section: 'Section B', grade_level: 'Grade 11', has_face: true, photo_url: null },
-  { id: 5, student_id: 'STU-005', full_name: 'Elena Garcia', section: 'Section C', grade_level: 'Grade 9', has_face: false, photo_url: null },
-  { id: 6, student_id: 'STU-006', full_name: 'Miguel Torres', section: 'Section C', grade_level: 'Grade 9', has_face: true, photo_url: null },
-  { id: 7, student_id: 'STU-007', full_name: 'Sofia Ramos', section: 'Section A', grade_level: 'Grade 10', has_face: true, photo_url: null },
-  { id: 8, student_id: 'STU-008', full_name: 'Luis Bautista', section: 'Section D', grade_level: 'Grade 12', has_face: false, photo_url: null },
+  { id: 1, student_id: 'STU-001', full_name: 'Maria Santos', section: '1st Year - Section A', grade_level: '1st Year', has_face: true, photo_url: null },
+  { id: 2, student_id: 'STU-002', full_name: 'Juan Dela Cruz', section: '1st Year - Section B', grade_level: '1st Year', has_face: true, photo_url: null },
+  { id: 3, student_id: 'STU-003', full_name: 'Ana Reyes', section: '2nd Year - Section C', grade_level: '2nd Year', has_face: false, photo_url: null },
+  { id: 4, student_id: 'STU-004', full_name: 'Carlos Mendoza', section: '2nd Year - Section A', grade_level: '2nd Year', has_face: true, photo_url: null },
+  { id: 5, student_id: 'STU-005', full_name: 'Elena Garcia', section: '3rd Year - Section B', grade_level: '3rd Year', has_face: false, photo_url: null },
+  { id: 6, student_id: 'STU-006', full_name: 'Miguel Torres', section: '3rd Year - Section D', grade_level: '3rd Year', has_face: true, photo_url: null },
+  { id: 7, student_id: 'STU-007', full_name: 'Sofia Ramos', section: '4th Year - Section A', grade_level: '4th Year', has_face: true, photo_url: null },
+  { id: 8, student_id: 'STU-008', full_name: 'Luis Bautista', section: '4th Year - Section E', grade_level: '4th Year', has_face: false, photo_url: null },
 ]
 
 export default useStudents

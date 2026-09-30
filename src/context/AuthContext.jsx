@@ -7,6 +7,25 @@ const AuthContext = createContext(null)
 
 const USER_STORAGE_KEY = 'smartcctv_user'
 const TOKEN_STORAGE_KEY = 'access_token'
+const ADMIN_REGISTRATION_CODE = 'ADMIN2026'
+
+const OFFLINE_ACCOUNTS = {
+  teacher: {
+    id: 1,
+    username: 'teacher',
+    full_name: 'Faculty Instructor',
+    role: 'teacher',
+    email: 'teacher@smartcctv.edu',
+  },
+  admin: {
+    id: 2,
+    username: 'admin',
+    full_name: 'System Administrator',
+    role: 'admin',
+    email: 'admin@smartcctv.edu',
+  },
+}
+const OFFLINE_PASSWORDS = ['password123', 'admin123', 'teacher2026']
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
@@ -68,14 +87,9 @@ export function AuthProvider({ children }) {
     } catch (err) {
       // Support default fallback credentials if backend is momentarily unreachable
       const cleanUser = username.trim().toLowerCase()
-      if (cleanUser === 'teacher' && (password === 'password123' || password === 'TEACHER2026')) {
-        authenticatedUser = {
-          id: 1,
-          username: 'teacher',
-          full_name: 'Faculty Instructor',
-          role: 'teacher',
-          email: 'teacher@smartcctv.edu',
-        }
+      const offlineAccount = OFFLINE_ACCOUNTS[cleanUser]
+      if (offlineAccount && OFFLINE_PASSWORDS.includes(password)) {
+        authenticatedUser = offlineAccount
         accessToken = `local_token_${Date.now()}`
       } else {
         throw err
@@ -86,7 +100,10 @@ export function AuthProvider({ children }) {
       // Show 3-second futuristic cyberpunk loading screen
       setAuthTransition({
         type: 'login',
-        message: 'Credentials verified // Loading biometric attendance matrix & RTSP stream...',
+        message:
+          authenticatedUser.role === 'admin'
+            ? 'Clearance verified // Loading administrator control plane...'
+            : 'Credentials verified // Loading biometric attendance matrix & RTSP stream...',
       })
 
       await new Promise((resolve) => setTimeout(resolve, 3000))
@@ -103,9 +120,9 @@ export function AuthProvider({ children }) {
   }, [])
 
   const register = useCallback(async ({ username, password, fullName, registrationCode, email }) => {
-    // Check hardcoded teacher code on client as well for immediate feedback
-    if ((registrationCode || '').trim().toUpperCase() !== 'TEACHER2026') {
-      throw new Error("Invalid clearance code. Faculty registration code 'TEACHER2026' is required.")
+    // Only administrators may self-register; teachers are provisioned from Teacher Management
+    if ((registrationCode || '').trim().toUpperCase() !== ADMIN_REGISTRATION_CODE) {
+      throw new Error('Invalid clearance code. An administrator registration code is required.')
     }
 
     const res = await registerUser({

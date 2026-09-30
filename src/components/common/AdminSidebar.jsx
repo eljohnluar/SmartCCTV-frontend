@@ -1,27 +1,27 @@
 import {
-  AlertTriangle,
-  BarChart3,
+  CalendarCheck,
   ChevronLeft,
   ChevronRight,
+  GraduationCap,
   LayoutDashboard,
-  Settings,
-  Shield,
-  Users,
   LogOut,
+  ScrollText,
+  Settings,
+  ShieldCheck,
 } from 'lucide-react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useApp } from '../../context/AppContext'
 import { useAuth } from '../../context/AuthContext'
 
-const navItems = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/students', label: 'Students', icon: Users },
-  { to: '/reports', label: 'Reports', icon: BarChart3 },
-  { to: '/alerts', label: 'Alerts', icon: AlertTriangle },
-  { to: '/settings', label: 'Settings', icon: Settings },
+const adminNavItems = [
+  { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/admin/teachers', label: 'Teacher Management', icon: GraduationCap },
+  { to: '/admin/attendance', label: 'Attendance', icon: CalendarCheck },
+  { to: '/admin/audit', label: 'Audit Log', icon: ScrollText },
+  { to: '/admin/settings', label: 'Settings', icon: Settings },
 ]
 
-export default function Sidebar() {
+export default function AdminSidebar() {
   const { sidebarOpen, toggleSidebar } = useApp()
   const { user, logout } = useAuth()
   const navigate = useNavigate()
@@ -36,24 +36,20 @@ export default function Sidebar() {
     >
       {/* Logo */}
       <div className="flex min-h-[76px] items-center gap-3 border-b border-[#263449] px-4 py-5">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white shadow-[0_0_22px_rgba(50,213,131,0.18)]" aria-hidden="true">
-          <img
-            src="/logo-mark.jpg"
-            alt=""
-            className="h-full w-full object-cover"
-          />
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-cyan-400/10 text-cyan-300 shadow-[0_0_22px_rgba(0,240,255,0.18)]" aria-hidden="true">
+          <ShieldCheck size={19} />
         </div>
         {sidebarOpen && (
           <div className="overflow-hidden max-lg:hidden">
             <p className="whitespace-nowrap text-sm font-semibold leading-tight text-white">SmartCCTV</p>
-            <p className="whitespace-nowrap text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">AI-Powered System</p>
+            <p className="whitespace-nowrap text-[10px] font-medium uppercase tracking-[0.12em] text-cyan-300/70">Admin Control</p>
           </div>
         )}
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 space-y-1 overflow-x-hidden overflow-y-auto px-2 py-5">
-        {navItems.map(({ to, label, icon: Icon, end }) => (
+        {adminNavItems.map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}
             to={to}
@@ -62,14 +58,14 @@ export default function Sidebar() {
               flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium
               transition-colors duration-150 group relative
               ${isActive
-                ? 'bg-emerald-400/10 text-emerald-300 shadow-[inset_2px_0_0_#32d583]'
+                ? 'bg-cyan-400/10 text-cyan-200 shadow-[inset_2px_0_0_#00f0ff]'
                 : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200'
               }
             `}
           >
             {({ isActive }) => (
               <>
-                <Icon size={18} className={`shrink-0 ${isActive ? 'text-emerald-300' : 'text-slate-400 group-hover:text-slate-200'}`} />
+                <Icon size={18} className={`shrink-0 ${isActive ? 'text-cyan-300' : 'text-slate-400 group-hover:text-slate-200'}`} />
                 {sidebarOpen && <span className="whitespace-nowrap max-lg:hidden">{label}</span>}
                 {!sidebarOpen && (
                   <div className="
@@ -87,18 +83,18 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* System badge & Teacher profile */}
+      {/* Account badge */}
       <div className="border-t border-[#263449] p-3 space-y-2">
         {sidebarOpen && (
           <div className="flex items-center justify-between px-2 max-lg:hidden">
             <div className="flex items-center gap-2 text-slate-400 font-mono">
-              <Shield size={12} className="text-cyan-400" />
-              <span className="text-[10px] font-bold tracking-wider text-cyan-300 uppercase">
-                {user ? user.username : 'TEACHER CONSOLE'}
+              <ShieldCheck size={12} className="text-cyan-400" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-300">
+                {user ? user.username : 'ADMIN CONSOLE'}
               </span>
             </div>
-            <span className="rounded bg-cyan-500/10 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase text-cyan-300">
-              {user?.role || 'teacher'}
+            <span className="rounded bg-cyan-500/10 px-1.5 py-0.5 font-mono text-[9px] font-bold text-cyan-300">
+              ADMIN
             </span>
           </div>
         )}
@@ -109,7 +105,7 @@ export default function Sidebar() {
               await logout()
               navigate('/login')
             }}
-            title="Sign out of Teacher console"
+            title="Sign out of Administrator console"
             className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/10 hover:text-red-300"
           >
             <LogOut size={16} className="shrink-0" />
