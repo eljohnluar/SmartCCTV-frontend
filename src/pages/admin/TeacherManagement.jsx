@@ -18,6 +18,7 @@ import {
   updateTeacherAccount,
 } from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
+import { usePasswordConfirm } from '../../hooks/usePasswordConfirm'
 import { formatDate, formatTime } from '../../utils/helpers'
 import { SECTION_LETTERS, YEAR_LEVELS, assignableSections } from '../../utils/constants'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
@@ -68,6 +69,7 @@ function ScopePills({ title, hint, options, selected, onToggle }) {
 export default function TeacherManagement() {
   const { user } = useAuth()
   const currentUsername = user?.username
+  const { confirm, dialog } = usePasswordConfirm()
 
   const [accounts, setAccounts] = useState([])
   const [loading, setLoading] = useState(true)
@@ -81,7 +83,6 @@ export default function TeacherManagement() {
   const [form, setForm] = useState(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
   const [confirmId, setConfirmId] = useState(null)
-  const [busyId, setBusyId] = useState(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -161,7 +162,6 @@ export default function TeacherManagement() {
         const payload = {
           full_name: form.full_name.trim(),
           email: form.email.trim() || null,
-          is_active: editing.is_active,
           role: form.role,
           year_levels: form.year_levels,
           sections: form.sections,
@@ -193,32 +193,29 @@ export default function TeacherManagement() {
   const toggleActive = async (acct) => {
     if (acct.username === currentUsername) return toast.error('You cannot disable your own account')
     if (acct.role === 'admin' && acct.is_active && adminCount <= 1) return toast.error('Cannot disable the last administrator')
-    setBusyId(acct.id)
-    try {
-      await updateTeacherAccount(acct.id, { is_active: !acct.is_active })
-      toast.success(acct.is_active ? 'Account disabled' : 'Account enabled')
-      await load()
-    } catch (err) {
-      toast.error(err.message || 'Failed to update status')
-    } finally {
-      setBusyId(null)
-    }
+    const nextActive = !acct.is_active
+    const done = await confirm((password) => updateTeacherAccount(acct.id, { is_active: nextActive }, password), {
+      title: nextActive ? 'Enable account' : 'Disable account',
+      description: `${nextActive ? 'Enabling' : 'Disabling'} @${acct.username} changes what this staff member can do right now. Confirm with your password.`,
+      confirmLabel: nextActive ? 'Enable' : 'Disable',
+    })
+    if (!done) return
+    toast.success(nextActive ? 'Account enabled' : 'Account disabled')
+    await load()
   }
 
   const handleDelete = async (acct) => {
     if (acct.username === currentUsername) return toast.error('You cannot delete your own account')
     if (acct.role === 'admin' && adminCount <= 1) return toast.error('Cannot delete the last administrator')
-    setBusyId(acct.id)
-    try {
-      const res = await deleteTeacherAccount(acct.id)
-      toast.success(res?.message || 'Account deleted')
-      setConfirmId(null)
-      await load()
-    } catch (err) {
-      toast.error(err.message || 'Failed to delete account')
-    } finally {
-      setBusyId(null)
-    }
+    setConfirmId(null)
+    const done = await confirm((password) => deleteTeacherAccount(acct.id, password), {
+      title: 'Delete account',
+      description: `Permanently remove @${acct.username}. Confirm with your password.`,
+      confirmLabel: 'Delete account',
+    })
+    if (!done) return
+    toast.success('Account deleted')
+    await load()
   }
 
   const confirmTarget = accounts.find((a) => a.id === confirmId)
@@ -366,7 +363,7 @@ export default function TeacherManagement() {
                           </button>
                           <button
                             onClick={() => toggleActive(acct)}
-                            disabled={busyId === acct.id || isSelf || isLastAdmin}
+                            disabled={isSelf || isLastAdmin}
                             title={isSelf ? 'Your own account' : isLastAdmin ? 'Last administrator' : acct.is_active ? 'Disable' : 'Enable'}
                             className="p-1.5 rounded-lg text-slate-400 hover:text-amber-300 hover:bg-amber-400/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:text-slate-400 disabled:hover:bg-transparent"
                           >
@@ -472,16 +469,17 @@ export default function TeacherManagement() {
               </button>
               <button
                 type="button"
-                disabled={busyId === confirmTarget.id}
                 onClick={() => handleDelete(confirmTarget)}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-red-500 text-white rounded-lg hover:bg-red-400 disabled:opacity-50 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-red-500 text-white rounded-lg hover:bg-red-400 transition-colors"
               >
-                <Trash2 size={14} />{busyId === confirmTarget.id ? 'Deleting…' : 'Delete account'}
+                <Trash2 size={14} />Delete account
               </button>
             </div>
           </div>
         )}
       </Modal>
+
+      {dialog}
     </div>
   )
 }

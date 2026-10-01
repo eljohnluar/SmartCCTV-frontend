@@ -2,6 +2,7 @@ import { Camera, Check, Video, X } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import { enrollFace, getGestureAttendanceSettings } from '../../services/api'
+import { usePasswordConfirm } from '../../hooks/usePasswordConfirm'
 import { enrollmentCameraOf, readStoredSettings } from '../../utils/settings'
 import Modal from '../common/Modal'
 
@@ -25,6 +26,7 @@ export default function FaceEnrollment({ open, onClose, student }) {
   const [captures, setCaptures] = useState({})
   const [enrolling, setEnrolling] = useState(false)
   const [gestureRequired, setGestureRequired] = useState(false)
+  const { confirm, dialog } = usePasswordConfirm()
 
   const activeStep = CAPTURE_STEPS.find((step) => !captures[step.id])
   const captureCount = Object.keys(captures).length
@@ -106,7 +108,12 @@ export default function FaceEnrollment({ open, onClose, student }) {
         const blob = await fetch(captures[step.id]).then((response) => response.blob())
         formData.append('images', blob, `${step.id}.jpg`)
       }
-      await enrollFace(formData)
+      const done = await confirm((password) => enrollFace(formData, password), {
+        title: 'Confirm face enrollment',
+        description: `Enrolling four face angles for ${student.full_name} replaces any existing facial samples. Enter your password to continue.`,
+        confirmLabel: 'Enroll face',
+      })
+      if (!done) return
       toast.success(`Four face angles enrolled for ${student.full_name}`)
       handleClose()
     } catch (error) {
@@ -126,6 +133,7 @@ export default function FaceEnrollment({ open, onClose, student }) {
   const sourceLabel = cameraSource === 'virtual' ? 'OBS Virtual Camera' : 'Browser webcam'
 
   return (
+    <>
     <Modal open={open} onClose={handleClose} title={`Four-angle face enrollment — ${student?.full_name ?? ''}`} size="md">
       <div className="space-y-4">
         <div className="flex items-center justify-between gap-3 rounded-lg border border-[#2d3148] bg-[#172235] px-3 py-2 text-xs text-slate-300">
@@ -170,5 +178,7 @@ export default function FaceEnrollment({ open, onClose, student }) {
         </div>
       </div>
     </Modal>
+    {dialog}
+    </>
   )
 }

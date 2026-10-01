@@ -25,8 +25,8 @@ export function useStudents(filters = {}) {
     fetchStudents()
   }, [fetchStudents])
 
-  const addStudent = useCallback(async (studentData) => {
-    const created = await createStudent(studentData)
+  const addStudent = useCallback(async (studentData, password) => {
+    const created = await createStudent(studentData, password)
     setStudents((prev) => [created, ...prev])
     return created
   }, [])
@@ -37,8 +37,8 @@ export function useStudents(filters = {}) {
     return updated
   }, [])
 
-  const removeStudent = useCallback(async (id) => {
-    await deleteStudent(id)
+  const removeStudent = useCallback(async (id, password) => {
+    await deleteStudent(id, password)
     setStudents((prev) => prev.filter((s) => s.id !== id))
   }, [])
 

@@ -11,12 +11,11 @@ export default function QuickActions({ onRefresh, onReset, onResetAttendance, on
   const handleResetAttendance = async () => {
     const fn = onResetAttendance || onReset
     if (!fn) return
-    const confirmed = window.confirm("Are you sure you want to reset today's marked attendance? All check-ins for today will be cleared.")
-    if (!confirmed) return
 
     setResettingAttendance(true)
     try {
-      await fn()
+      const done = await fn()
+      if (done === false) return
       toast.success("Today's marked attendance has been reset")
     } catch (error) {
       toast.error(error.message || 'Failed to reset attendance')
@@ -27,13 +26,12 @@ export default function QuickActions({ onRefresh, onReset, onResetAttendance, on
 
   const handleResetAlerts = async () => {
     if (!onResetAlerts) return
-    const confirmed = window.confirm("Are you sure you want to reset security alerts? All active security and threat alerts will be cleared.")
-    if (!confirmed) return
 
     setResettingAlerts(true)
     try {
-      await onResetAlerts()
-      toast.success("Security alerts have been reset")
+      const done = await onResetAlerts()
+      if (done === false) return
+      toast.success('Security alerts have been reset')
     } catch (error) {
       toast.error(error.message || 'Failed to reset security alerts')
     } finally {

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { assignableSections } from '../utils/constants'
 import { useStudents } from '../hooks/useStudents'
+import { usePasswordConfirm } from '../hooks/usePasswordConfirm'
 import StudentList from '../components/students/StudentList'
 import StudentForm from '../components/students/StudentForm'
 import FaceEnrollment from '../components/students/FaceEnrollment'
@@ -9,6 +10,7 @@ import FaceEnrollment from '../components/students/FaceEnrollment'
 export default function Students() {
   const { user } = useAuth()
   const { students, loading, addStudent, editStudent, removeStudent } = useStudents()
+  const { confirm, dialog } = usePasswordConfirm()
   const [formOpen, setFormOpen] = useState(false)
   const [editingStudent, setEditingStudent] = useState(null)
   const [enrollStudent, setEnrollStudent] = useState(null)
@@ -29,17 +31,20 @@ export default function Students() {
   }
 
   const handleSave = async (formData) => {
-    if (editingStudent) {
-      await editStudent(editingStudent.id, formData)
-    } else {
-      await addStudent(formData)
-    }
+    if (editingStudent) return editStudent(editingStudent.id, formData)
+    return confirm((password) => addStudent(formData, password), {
+      title: 'Confirm new student',
+      description: `Adding ${formData.full_name} (${formData.student_id}) to the roster requires your password.`,
+      confirmLabel: 'Add student',
+    })
   }
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this student?')) {
-      await removeStudent(id)
-    }
+    await confirm((password) => removeStudent(id, password), {
+      title: 'Confirm student deletion',
+      description: 'Removing a student also hides their attendance history. Enter your password to continue.',
+      confirmLabel: 'Delete student',
+    })
   }
 
   const handleEnroll = (student) => {
@@ -48,6 +53,7 @@ export default function Students() {
 
   return (
     <div className="space-y-6">
+      {dialog}
       {scopeSummary && (
         <p className="text-xs text-slate-500 -mb-3">Your sections: {scopeSummary}</p>
       )}

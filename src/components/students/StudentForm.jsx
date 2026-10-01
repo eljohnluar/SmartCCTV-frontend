@@ -28,7 +28,8 @@ export default function StudentForm({ open, onClose, student, onSave }) {
     }
     setSaving(true)
     try {
-      await onSave({ ...form, grade_level: yearLevelOfSection(form.section) || form.grade_level })
+      const saved = await onSave({ ...form, grade_level: yearLevelOfSection(form.section) || form.grade_level })
+      if (saved === false) return
       toast.success(isEdit ? 'Student updated' : 'Student added')
       onClose()
     } catch (err) {

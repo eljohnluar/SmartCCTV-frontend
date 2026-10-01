@@ -191,6 +191,7 @@ export default function Landing() {
         </div>
       </header>
 
+
       {/* ── Main Hero & Cyber Auth Console Section ─────────────────────────────── */}
       <main className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-8 sm:py-14">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-14">
@@ -204,6 +205,26 @@ export default function Landing() {
               </span>
             </div>
 
+            {/* C7 Company Logo — above headline */}
+            <div className="flex items-center gap-4 pt-1">
+              <div className="relative flex items-center justify-center rounded-xl border border-cyan-400/25 bg-black/50 px-5 py-3 shadow-[0_0_28px_rgba(0,240,255,0.14),inset_0_0_16px_rgba(0,240,255,0.03)]">
+                <span className="absolute left-0 top-0 h-2.5 w-2.5 border-l border-t border-cyan-400/50" />
+                <span className="absolute right-0 top-0 h-2.5 w-2.5 border-r border-t border-cyan-400/50" />
+                <span className="absolute bottom-0 left-0 h-2.5 w-2.5 border-b border-l border-cyan-400/50" />
+                <span className="absolute bottom-0 right-0 h-2.5 w-2.5 border-b border-r border-cyan-400/50" />
+                <img
+                  src="/company-logo.png"
+                  alt="C7 Company Logo"
+                  className="h-9 w-auto max-w-[130px] object-contain"
+                  onError={(e) => { e.currentTarget.style.display = 'none' }}
+                />
+              </div>
+              <div className="font-mono text-[10px] uppercase leading-relaxed tracking-widest text-slate-500">
+                <p className="text-cyan-400/70">POWERED BY</p>
+                <p className="text-white/60">C7</p>
+              </div>
+            </div>
+
             {/* Giant Futuristic Headline */}
             <div className="space-y-2">
               <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
@@ -213,11 +234,6 @@ export default function Landing() {
                 </span>{' '}
                 And Automated Attendance System
               </h1>
-              <p className="max-w-xl text-sm leading-relaxed text-slate-400 sm:text-base">
-                Biometric face recognition logging, real-time weapon &amp; threat neural sentry,
-                student dress code compliance, and palm gesture authorization—built for automated
-                institutional management.
-              </p>
             </div>
 
             {/* Cyber Status Tickers */}

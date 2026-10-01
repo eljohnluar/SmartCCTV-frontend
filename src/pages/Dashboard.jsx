@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAttendance } from '../hooks/useAttendance'
+import { usePasswordConfirm } from '../hooks/usePasswordConfirm'
 import StatsCards from '../components/dashboard/StatsCards'
 import AttendanceTable from '../components/dashboard/AttendanceTable'
 import AIStatusIndicator from '../components/dashboard/AIStatusIndicator'
@@ -14,9 +15,16 @@ import { resetAlerts } from '../services/api'
 
 export default function Dashboard() {
   const { attendance, stats, loading, refetch, resetToday } = useAttendance()
+  const { confirm, dialog } = usePasswordConfirm()
   const [recognition, setRecognition] = useState(null)
+  const [attendanceLogOpen, setAttendanceLogOpen] = useState(false)
   const dismissTimer = useRef(null)
   const displayedAttendance = useRef(new Set())
+
+  const handleAttendanceLogToggle = useCallback((action) => {
+    setAttendanceLogOpen(action === 'open')
+  }, [])
+
 
   useEffect(() => {
     const unsubAttendance = wsClient.on('attendance', (event) => {
@@ -40,23 +48,38 @@ export default function Dashboard() {
   }, [])
 
   const handleReset = async () => {
+    const done = await confirm((password) => resetToday(password), {
+      title: 'Confirm attendance reset',
+      description: 'This clears every check-in recorded today for all students.',
+      confirmLabel: 'Reset attendance',
+    })
+    if (!done) return false
     displayedAttendance.current.clear()
     setRecognition(null)
-    await resetToday()
+    return true
   }
 
-  const handleResetAlerts = async () => {
-    await resetAlerts()
-  }
+  const handleResetAlerts = () =>
+    confirm((password) => resetAlerts(password), {
+      title: 'Confirm alerts reset',
+      description: 'This deletes every security alert on record and resets detection cooldowns.',
+      confirmLabel: 'Reset alerts',
+    })
 
   return (
     <>
+      {dialog}
       <AttendanceRecognitionOverlay recognition={recognition} />
       <div className="mx-auto max-w-[1600px] space-y-6 pb-8">
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(350px,0.85fr)]">
-        <LiveCameraFeed />
-        <AttendanceLog records={attendance} loading={loading} />
+        <LiveCameraFeed attendanceRecords={attendance} />
+        <AttendanceLog
+          records={attendance}
+          loading={loading}
+          open={attendanceLogOpen}
+          onClose={handleAttendanceLogToggle}
+        />
       </div>
 
       <CheckinTimeSchedule />

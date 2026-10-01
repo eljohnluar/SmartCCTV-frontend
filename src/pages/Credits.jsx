@@ -265,6 +265,7 @@ export default function Credits() {
         </div>
       </header>
 
+
       {/* ── Main Content Container ────────────────────────────────────────────── */}
       <main className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-8 sm:py-12">
         {/* ── Institutional Banner: Bestlink College of the Philippines ────────── */}
@@ -277,16 +278,37 @@ export default function Credits() {
 
           <div className="flex flex-col items-center text-center">
             {/* Institution Badge */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-950/60 px-3.5 py-1 text-xs text-cyan-300 shadow-[0_0_15px_rgba(0,240,255,0.2)] mb-4">
+            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-950/60 px-3.5 py-1 text-xs text-cyan-300 shadow-[0_0_15px_rgba(0,240,255,0.2)] mb-6">
               <GraduationCap size={15} className="text-cyan-400" />
               <span className="font-mono text-[11px] font-bold tracking-widest uppercase">
                 ACADEMIC RESEARCH &amp; DEVELOPMENT
               </span>
             </div>
 
+            {/* C7 Company Logo — featured prominently */}
+            <div className="mb-6 flex flex-col items-center gap-3">
+              <div className="relative flex items-center justify-center rounded-2xl border border-cyan-400/30 bg-black/50 px-8 py-4 shadow-[0_0_35px_rgba(0,240,255,0.18),inset_0_0_20px_rgba(0,240,255,0.04)]">
+                {/* Corner accents on logo container */}
+                <span className="absolute left-0 top-0 h-3 w-3 border-l border-t border-cyan-400/60" />
+                <span className="absolute right-0 top-0 h-3 w-3 border-r border-t border-cyan-400/60" />
+                <span className="absolute bottom-0 left-0 h-3 w-3 border-b border-l border-cyan-400/60" />
+                <span className="absolute bottom-0 right-0 h-3 w-3 border-b border-r border-cyan-400/60" />
+                <img
+                  src="/company-logo.png"
+                  alt="C7 Company Logo"
+                  className="h-12 w-auto max-w-[160px] object-contain sm:h-16 sm:max-w-[200px]"
+                  onError={(e) => { e.currentTarget.style.display = 'none' }}
+                />
+              </div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-400/60">
+                DEVELOPED BY // C7
+              </p>
+            </div>
+
             <h1 className="text-2xl font-black tracking-wide text-white sm:text-4xl lg:text-5xl">
               BESTLINK COLLEGE OF THE PHILIPPINES
             </h1>
+
 
             <p className="mt-2 font-mono text-xs uppercase tracking-widest text-cyan-300 sm:text-sm">
               College of Computer Studies // Information Technology

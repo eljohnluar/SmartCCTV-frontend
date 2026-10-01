@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Camera, Cpu, Volume2, Palette, Save, Check, Hand, FlipHorizontal, ShieldAlert } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { usePasswordConfirm } from '../hooks/usePasswordConfirm'
 import { getGestureAttendanceSettings, getRuntimeControls, getUniformPolicy, getVoiceSettings, updateGestureAttendanceSettings, updateRuntimeControls, updateUniformPolicy, updateVoiceSettings } from '../services/api'
 import { SETTINGS_STORAGE_KEY } from '../utils/settings'
 
@@ -64,6 +65,7 @@ export default function Settings() {
     }
   })
   const [saving, setSaving] = useState(false)
+  const { confirm, dialog } = usePasswordConfirm()
 
   useEffect(() => {
     getUniformPolicy()
@@ -96,23 +98,25 @@ export default function Settings() {
   const handleSave = async (e) => {
     e.preventDefault()
     setSaving(true)
-    try {
-      await updateUniformPolicy(settings.uniformColors)
-      await updateVoiceSettings(settings.voiceGender)
-      await updateGestureAttendanceSettings(settings.gestureAttendanceEnabled)
+    const saved = await confirm(async (password) => {
+      await updateUniformPolicy(settings.uniformColors, password)
+      await updateVoiceSettings(settings.voiceGender, password)
+      await updateGestureAttendanceSettings(settings.gestureAttendanceEnabled, password)
       await updateRuntimeControls({
         camera_flip_horizontal: settings.cameraFlipHorizontal,
         announcer_enabled: settings.announcerEnabled,
         announcer_volume: settings.announcerVolume,
         alert_mode_enabled: settings.alertModeEnabled,
-      })
+      }, password)
       localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings))
-      toast.success('System configuration saved successfully')
-    } catch (error) {
-      toast.error(error.message || 'Could not save the uniform policy')
-    } finally {
-      setSaving(false)
-    }
+    }, {
+      title: 'Confirm configuration change',
+      description: 'Saving system configuration requires your account password.',
+      confirmLabel: 'Save configuration',
+    })
+    setSaving(false)
+    if (!saved) return
+    toast.success('System configuration saved successfully')
   }
 
   const toggleUniformColor = (color) => {
@@ -445,6 +449,8 @@ export default function Settings() {
           </button>
         </div>
       </form>
+
+      {dialog}
     </div>
   )
 }

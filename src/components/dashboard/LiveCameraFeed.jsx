@@ -1,12 +1,341 @@
-import { Camera, Maximize2, Pause, Play, Radio, RefreshCw, Video } from 'lucide-react'
+import { Camera, CheckCircle2, ChevronRight, Clock3, Maximize2, Minimize2, Pause, Play, Radio, RefreshCw, Users, Video, X } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import toast from 'react-hot-toast'
 import { useApp } from '../../context/AppContext'
 import { readStoredSettings, liveFeedCameraOf } from '../../utils/settings'
 
 const streamUrl = '/api/camera/stream'
 
-export default function LiveCameraFeed() {
+function formatTime(ts) {
+  if (!ts) return 'Just now'
+  return new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }).format(new Date(ts))
+}
+
+/* ─── Floating Attendance Log Glassmorphism Modal ───────────────────────── */
+function FloatingAttendanceGlassModal({ records = [], isOpen, onToggle }) {
+  const markedRecords = records
+    .filter((r) => r.status === 'present' || r.status === 'late')
+    .sort((a, b) => new Date(b.check_in_time || 0) - new Date(a.check_in_time || 0))
+
+  if (!isOpen) {
+    return (
+      <button
+        onClick={onToggle}
+        className="group absolute right-5 sm:right-6 top-20 z-30 flex items-center gap-2.5 rounded-2xl border border-white/20 px-4 py-2.5 shadow-[0_20px_45px_rgba(0,0,0,0.6),0_0_20px_rgba(16,185,129,0.18)] transition-all hover:scale-105 hover:border-emerald-400/40 active:scale-95"
+        style={{
+          background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.65) 0%, rgba(10, 16, 26, 0.8) 100%)',
+          backdropFilter: 'blur(24px) saturate(190%)',
+        }}
+        title="Show floating attendance log"
+      >
+        <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-emerald-400/15 text-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+          <Users size={15} />
+        </div>
+        <span className="text-xs font-semibold text-white">Attendance Log</span>
+        <span className="rounded-full border border-emerald-400/30 bg-emerald-400/20 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
+          {markedRecords.length}
+        </span>
+        <ChevronRight size={14} className="text-slate-400 transition-transform group-hover:translate-x-0.5" />
+      </button>
+    )
+  }
+
+  return (
+    <aside
+      className="absolute right-4 sm:right-6 top-20 bottom-6 z-30 flex w-[320px] sm:w-[370px] flex-col rounded-3xl border border-white/15 shadow-[0_25px_60px_rgba(0,0,0,0.65),0_0_30px_rgba(16,185,129,0.12)] transition-all duration-300 animate-in fade-in zoom-in-95"
+      style={{
+        background: 'linear-gradient(155deg, rgba(13, 22, 38, 0.62) 0%, rgba(8, 14, 25, 0.78) 100%)',
+        backdropFilter: 'blur(28px) saturate(190%)',
+      }}
+      aria-label="Floating Attendance Log"
+    >
+      {/* Top glass gradient shine */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+      {/* Ambient emerald backlight */}
+      <div className="pointer-events-none absolute -top-10 -right-10 h-36 w-36 rounded-full bg-emerald-500/10 blur-3xl" />
+
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-emerald-400/15 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.2)]">
+            <Users size={16} />
+          </div>
+          <div>
+            <p className="text-xs font-semibold tracking-wide text-white">Attendance Log</p>
+            <p className="text-[10px] text-slate-400">Live AI Biometric Matches</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="rounded-full border border-emerald-400/25 bg-emerald-400/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.15)]">
+            {markedRecords.length} today
+          </span>
+          <button
+            onClick={onToggle}
+            aria-label="Minimize attendance log"
+            title="Minimize"
+            className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
+          >
+            <Minimize2 size={14} />
+          </button>
+        </div>
+      </div>
+
+      {/* Scrollable records */}
+      <div className="min-h-0 flex-1 divide-y divide-white/[0.06] overflow-y-auto px-4 py-2">
+        {markedRecords.length === 0 && (
+          <div className="flex h-full min-h-48 flex-col items-center justify-center gap-2 text-center text-slate-400">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
+              <CheckCircle2 size={22} className="text-slate-500" />
+            </div>
+            <p className="text-xs font-medium text-slate-200">Awaiting Recognition</p>
+            <p className="max-w-[210px] text-[11px] text-slate-400">
+              Recognized students will automatically appear here in real time.
+            </p>
+          </div>
+        )}
+        {markedRecords.map((record) => (
+          <div
+            key={record.id || `${record.student_id}-${record.check_in_time}`}
+            className="flex items-center gap-3 rounded-2xl px-2 py-3 transition-colors hover:bg-white/[0.04]"
+          >
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-emerald-400/20 bg-emerald-400/15 text-xs font-bold text-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.15)]">
+              {(record.student_name || '?').slice(0, 1).toUpperCase()}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-medium text-slate-100">{record.student_name || 'Unknown student'}</p>
+              <p className="truncate text-[10px] text-slate-400">
+                {record.student_code && record.section
+                  ? `${record.student_code} · ${record.section}`
+                  : record.student_code || record.section || 'Face recognition'}
+              </p>
+            </div>
+            <div className="shrink-0 text-right">
+              <p className="flex items-center justify-end gap-1 text-[10px] font-semibold text-emerald-300">
+                <Clock3 size={11} /> {formatTime(record.check_in_time)}
+              </p>
+              {record.confidence != null && (
+                <p className="mt-0.5 font-mono text-[10px] text-slate-400">
+                  {Math.round(record.confidence * 100)}% match
+                </p>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Floating glass card footer */}
+      <div className="border-t border-white/10 px-5 py-2.5 text-center">
+        <p className="text-[10px] text-slate-400">Auto-updating · Floating Glass View</p>
+      </div>
+    </aside>
+  )
+}
+
+/* ─── Fullscreen Camera Modal ────────────────────────────────────────────── */
+function FullscreenModal({
+  isWebcam,
+  videoRef: externalVideoRef,
+  streamKey,
+  mirrored,
+  failed,
+  failReason,
+  reconnect,
+  onClose,
+  attendanceRecords,
+}) {
+  const modalVideoRef = useRef(null)
+  const { cameraActive, attendanceRecording, updateAttendanceRecording } = useApp()
+  const [recordingBusy, setRecordingBusy] = useState(false)
+  const [showAttendanceModal, setShowAttendanceModal] = useState(true)
+  const isLive = cameraActive || (isWebcam && externalVideoRef.current?.srcObject)
+
+  // Mirror the webcam stream into the fullscreen video element
+  useEffect(() => {
+    if (!isWebcam) return
+    const srcStream = externalVideoRef.current?.srcObject
+    if (srcStream && modalVideoRef.current) {
+      modalVideoRef.current.srcObject = srcStream
+    }
+  }, [isWebcam, externalVideoRef])
+
+  // Close on Escape
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [onClose])
+
+  const toggleAttendanceRecording = async () => {
+    setRecordingBusy(true)
+    try {
+      await updateAttendanceRecording(!attendanceRecording)
+    } catch (error) {
+      toast.error(error.message || 'Could not change attendance recording state')
+    } finally {
+      setRecordingBusy(false)
+    }
+  }
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[9999] flex flex-col bg-black overflow-hidden select-none"
+      role="dialog"
+      aria-label="Fullscreen camera feed"
+    >
+      {/* ── Top Bar ── */}
+      <div className="absolute inset-x-0 top-0 z-40 flex items-center justify-between bg-gradient-to-b from-black/85 via-black/45 to-transparent px-5 py-4 sm:px-6">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-400/10 text-emerald-300">
+            {isWebcam ? <Video size={17} /> : <Camera size={17} />}
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-white">Live camera feed</p>
+            <p className="text-[10px] text-slate-400">Main entrance · {isWebcam ? 'Browser webcam' : 'Virtual camera'}</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide ${
+              isLive
+                ? 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300'
+                : 'border-slate-600/40 text-slate-500'
+            }`}
+          >
+            <Radio size={11} className={isLive ? 'animate-pulse' : ''} />
+            {isLive ? 'Live' : 'Offline'}
+          </span>
+
+          <button
+            onClick={() => setShowAttendanceModal((prev) => !prev)}
+            aria-label="Toggle Attendance Log"
+            title={showAttendanceModal ? 'Hide Attendance Log' : 'Show Attendance Log'}
+            className={`hidden sm:inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[10px] font-semibold transition-colors ${
+              showAttendanceModal
+                ? 'bg-emerald-400/15 text-emerald-300 border border-emerald-400/30'
+                : 'bg-white/10 text-slate-300 hover:bg-white/15'
+            }`}
+          >
+            <Users size={12} />
+            <span>Attendance Log</span>
+          </button>
+
+          <button
+            onClick={toggleAttendanceRecording}
+            disabled={recordingBusy}
+            className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[10px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+              attendanceRecording
+                ? 'bg-red-400/10 text-red-300 hover:bg-red-400/20'
+                : 'bg-emerald-400/10 text-emerald-300 hover:bg-emerald-400/20'
+            }`}
+          >
+            {attendanceRecording ? <Pause size={12} /> : <Play size={12} />}
+            {attendanceRecording ? 'Pause attendance' : 'Record attendance'}
+          </button>
+
+          <button
+            onClick={reconnect}
+            aria-label="Reconnect"
+            className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
+          >
+            <RefreshCw size={15} />
+          </button>
+
+          <button
+            onClick={onClose}
+            aria-label="Exit fullscreen"
+            className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
+          >
+            <X size={18} />
+          </button>
+        </div>
+      </div>
+
+      {/* ── 100% Fullscreen Camera Feed Layer ── */}
+      <div className="relative flex-1 w-full h-full overflow-hidden bg-[#080d15]">
+        <div className="absolute inset-0 flex items-center justify-center">
+          {isWebcam ? (
+            <video
+              ref={modalVideoRef}
+              autoPlay
+              playsInline
+              muted
+              className={`h-full w-full object-contain ${failed ? 'hidden' : 'block'} ${mirrored ? '-scale-x-100' : ''}`}
+            />
+          ) : (
+            !failed && (
+              <img
+                key={streamKey}
+                src={`${streamUrl}?refresh=${streamKey}`}
+                alt="Live camera feed"
+                className="h-full w-full object-contain"
+              />
+            )
+          )}
+        </div>
+
+        {/* HUD overlays over live video */}
+        {!failed && (
+          <>
+            <div className="absolute left-6 top-20 z-20 flex items-center gap-2 rounded-md bg-black/60 px-2.5 py-1 font-mono text-[10px] tracking-wide text-white/90 backdrop-blur-md border border-white/10">
+              <span className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
+              <span className="h-2 w-2 rounded-full bg-red-400 absolute" />
+              <span className="ml-1">REC 01</span>
+            </div>
+            <div className="absolute bottom-6 left-6 z-20 rounded-md bg-black/60 px-2.5 py-1 font-mono text-[10px] text-white/80 backdrop-blur-md border border-white/10">
+              CAM 01 · 1080P · 30FPS
+            </div>
+          </>
+        )}
+
+        {/* Camera unavailable state */}
+        {failed && (
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 text-center text-slate-500">
+            <div className="mb-1 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-800/80 border border-slate-700">
+              <Camera size={26} className="text-slate-400" />
+            </div>
+            <p className="text-base font-semibold text-slate-200">Camera feed is unavailable</p>
+            <p className="max-w-sm text-xs text-slate-400">
+              {failReason || 'Confirm the camera is running and the configured device is available.'}
+            </p>
+            <button
+              onClick={reconnect}
+              className="mt-3 rounded-xl bg-emerald-400/15 border border-emerald-400/30 px-4 py-2 text-xs font-semibold text-emerald-300 transition-colors hover:bg-emerald-400/25"
+            >
+              Try reconnecting
+            </button>
+          </div>
+        )}
+
+        {/* ── Floating Attendance Log Glassmorphism Modal ── */}
+        <FloatingAttendanceGlassModal
+          records={attendanceRecords}
+          isOpen={showAttendanceModal}
+          onToggle={() => setShowAttendanceModal((prev) => !prev)}
+        />
+      </div>
+
+      {/* ── Bottom Overlay Bar ── */}
+      <div className="absolute inset-x-0 bottom-0 z-20 pointer-events-none flex items-center justify-between bg-gradient-to-t from-black/80 via-black/30 to-transparent px-6 py-4">
+        <div />
+        <button
+          onClick={onClose}
+          className="pointer-events-auto flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-medium text-white/90 backdrop-blur-md transition-all hover:bg-white/20 active:scale-95 shadow-lg"
+        >
+          <Minimize2 size={13} /> Exit fullscreen
+        </button>
+      </div>
+    </div>,
+    document.body
+  )
+}
+
+/* ─── Main LiveCameraFeed Component ──────────────────────────────────────── */
+export default function LiveCameraFeed({ attendanceRecords = [] }) {
   const [streamKey, setStreamKey] = useState(0)
   const [failed, setFailed] = useState(false)
   const [failReason, setFailReason] = useState('')
@@ -14,6 +343,7 @@ export default function LiveCameraFeed() {
   const [streamReady, setStreamReady] = useState(false)
   const [recordingBusy, setRecordingBusy] = useState(false)
   const [stored] = useState(readStoredSettings)
+  const [fullscreen, setFullscreen] = useState(false)
   const videoRef = useRef(null)
   const streamRef = useRef(null)
 
@@ -74,75 +404,135 @@ export default function LiveCameraFeed() {
   const mirrored = Boolean(stored.cameraFlipHorizontal)
 
   return (
-    <section className="overflow-hidden rounded-3xl border border-[#2b3b51] bg-[#111a27] shadow-[0_20px_55px_rgba(0,0,0,0.22)]">
-      <div className="flex items-center justify-between px-5 py-4 sm:px-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-400/10 text-emerald-300">
-            {isWebcam ? <Video size={17} /> : <Camera size={17} />}
-          </div>
-          <div>
-            <h2 className="text-sm font-semibold text-white">Live camera feed</h2>
-            <p className="text-[11px] text-slate-500">Main entrance · {isWebcam ? 'Browser webcam' : 'Virtual camera'}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className={`hidden items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide sm:inline-flex ${isLive ? 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300' : 'border-slate-600/40 text-slate-500'}`}>
-            <Radio size={11} className={isLive ? 'animate-pulse' : ''} /> {isLive ? 'Live' : 'Offline'}
-          </span>
-          <button
-            onClick={toggleAttendanceRecording}
-            disabled={!cameraReady || recordingBusy}
-            className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[10px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${attendanceRecording ? 'bg-red-400/10 text-red-300 hover:bg-red-400/20' : 'bg-emerald-400/10 text-emerald-300 hover:bg-emerald-400/20'}`}
-          >
-            {attendanceRecording ? <Pause size={12} /> : <Play size={12} />}
-            {attendanceRecording ? 'Pause attendance' : 'Record attendance'}
-          </button>
-          <button onClick={reconnect} aria-label="Reconnect camera stream" className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/5 hover:text-white">
-            <RefreshCw size={15} />
-          </button>
-        </div>
-      </div>
-      <div className="relative aspect-video overflow-hidden bg-[#080d15] xl:aspect-[16/8]">
-        {isWebcam ? (
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            onPlay={() => setStreamReady(true)}
-            className={`h-full w-full object-cover ${failed ? 'hidden' : 'block'} ${mirrored ? '-scale-x-100' : ''}`}
-          />
-        ) : (
-          !failed && (
-            <img
-              key={streamKey}
-              src={`${streamUrl}?refresh=${streamKey}`}
-              alt="Live camera feed"
-              onLoad={() => setStreamReady(true)}
-              onError={() => { setFailReason(''); setFailed(true) }}
-              className="h-full w-full object-cover"
-            />
-          )
-        )}
-        {!failed && (
-          <>
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/45 to-transparent" />
-            <div className="absolute left-4 top-4 flex items-center gap-2 rounded-md bg-black/50 px-2 py-1 font-mono text-[10px] tracking-wide text-white/85 backdrop-blur-sm">
-              <span className="h-1.5 w-1.5 rounded-full bg-red-400" /> REC 01
+    <>
+      <section className="overflow-hidden rounded-3xl border border-[#2b3b51] bg-[#111a27] shadow-[0_20px_55px_rgba(0,0,0,0.22)]">
+        <div className="flex items-center justify-between px-5 py-4 sm:px-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-400/10 text-emerald-300">
+              {isWebcam ? <Video size={17} /> : <Camera size={17} />}
             </div>
-            <div className="absolute bottom-4 left-4 rounded-md bg-black/45 px-2 py-1 font-mono text-[10px] text-white/75 backdrop-blur-sm">CAM 01 · 1080P</div>
-            <Maximize2 size={15} className="absolute bottom-4 right-4 text-white/70" />
-          </>
-        )}
-        {failed && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center text-slate-500">
-            <div className="mb-1 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-800/70"><Camera size={23} /></div>
-            <p className="text-sm font-medium text-slate-300">Camera feed is unavailable</p>
-            <p className="max-w-sm text-xs">{failReason || 'Confirm the camera is running and the configured device is available.'}</p>
-            <button onClick={reconnect} className="mt-2 rounded-lg bg-emerald-400/10 px-3 py-2 text-xs font-medium text-emerald-300 transition-colors hover:bg-emerald-400/20">Try reconnecting</button>
+            <div>
+              <h2 className="text-sm font-semibold text-white">Live camera feed</h2>
+              <p className="text-[11px] text-slate-500">Main entrance · {isWebcam ? 'Browser webcam' : 'Virtual camera'}</p>
+            </div>
           </div>
-        )}
-      </div>
-    </section>
+          <div className="flex items-center gap-2">
+            <span
+              className={`hidden items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide sm:inline-flex ${
+                isLive
+                  ? 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300'
+                  : 'border-slate-600/40 text-slate-500'
+              }`}
+            >
+              <Radio size={11} className={isLive ? 'animate-pulse' : ''} /> {isLive ? 'Live' : 'Offline'}
+            </span>
+            <button
+              onClick={toggleAttendanceRecording}
+              disabled={!cameraReady || recordingBusy}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[10px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+                attendanceRecording
+                  ? 'bg-red-400/10 text-red-300 hover:bg-red-400/20'
+                  : 'bg-emerald-400/10 text-emerald-300 hover:bg-emerald-400/20'
+              }`}
+            >
+              {attendanceRecording ? <Pause size={12} /> : <Play size={12} />}
+              {attendanceRecording ? 'Pause attendance' : 'Record attendance'}
+            </button>
+            <button
+              onClick={reconnect}
+              aria-label="Reconnect camera stream"
+              className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
+            >
+              <RefreshCw size={15} />
+            </button>
+            <button
+              onClick={() => setFullscreen(true)}
+              aria-label="Open fullscreen camera view"
+              title="Fullscreen"
+              className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
+            >
+              <Maximize2 size={15} />
+            </button>
+          </div>
+        </div>
+
+        <div className="relative aspect-video overflow-hidden bg-[#080d15] xl:aspect-[16/8]">
+          {isWebcam ? (
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              onPlay={() => setStreamReady(true)}
+              className={`h-full w-full object-cover ${failed ? 'hidden' : 'block'} ${mirrored ? '-scale-x-100' : ''}`}
+            />
+          ) : (
+            !failed && (
+              <img
+                key={streamKey}
+                src={`${streamUrl}?refresh=${streamKey}`}
+                alt="Live camera feed"
+                onLoad={() => setStreamReady(true)}
+                onError={() => {
+                  setFailReason('')
+                  setFailed(true)
+                }}
+                className="h-full w-full object-cover"
+              />
+            )
+          )}
+          {!failed && (
+            <>
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/45 to-transparent" />
+              <div className="absolute left-4 top-4 flex items-center gap-2 rounded-md bg-black/50 px-2 py-1 font-mono text-[10px] tracking-wide text-white/85 backdrop-blur-sm">
+                <span className="h-1.5 w-1.5 rounded-full bg-red-400" /> REC 01
+              </div>
+              <div className="absolute bottom-4 left-4 rounded-md bg-black/45 px-2 py-1 font-mono text-[10px] text-white/75 backdrop-blur-sm">
+                CAM 01 · 1080P
+              </div>
+              <button
+                onClick={() => setFullscreen(true)}
+                aria-label="Open fullscreen"
+                className="absolute bottom-4 right-4 rounded-md bg-black/45 p-1.5 text-white/70 backdrop-blur-sm transition-colors hover:bg-black/70 hover:text-white"
+              >
+                <Maximize2 size={15} />
+              </button>
+            </>
+          )}
+          {failed && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center text-slate-500">
+              <div className="mb-1 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-800/70">
+                <Camera size={23} />
+              </div>
+              <p className="text-sm font-medium text-slate-300">Camera feed is unavailable</p>
+              <p className="max-w-sm text-xs">
+                {failReason || 'Confirm the camera is running and the configured device is available.'}
+              </p>
+              <button
+                onClick={reconnect}
+                className="mt-2 rounded-lg bg-emerald-400/10 px-3 py-2 text-xs font-medium text-emerald-300 transition-colors hover:bg-emerald-400/20"
+              >
+                Try reconnecting
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Fullscreen modal portal */}
+      {fullscreen && (
+        <FullscreenModal
+          isWebcam={isWebcam}
+          videoRef={videoRef}
+          streamKey={streamKey}
+          mirrored={mirrored}
+          failed={failed}
+          failReason={failReason}
+          reconnect={reconnect}
+          onClose={() => setFullscreen(false)}
+          attendanceRecords={attendanceRecords}
+        />
+      )}
+    </>
   )
 }

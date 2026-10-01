@@ -85,12 +85,8 @@ export function useAttendance(date = null) {
     return record
   }, [])
 
-  const resetToday = useCallback(async () => {
-    try {
-      await resetAttendance()
-    } catch (err) {
-      console.warn('[useAttendance] Reset API call failed, resetting locally:', err.message)
-    }
+  const resetToday = useCallback(async (password) => {
+    await resetAttendance(password)
     setAttendance([])
     setStats({ total: 0, present: 0, late: 0, rate: 0 })
   }, [])

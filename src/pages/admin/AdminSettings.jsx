@@ -14,6 +14,7 @@ import {
   updateVoiceSettings,
 } from '../../services/api'
 import { SETTINGS_STORAGE_KEY, readStoredSettings } from '../../utils/settings'
+import { usePasswordConfirm } from '../../hooks/usePasswordConfirm'
 
 function ToggleButton({ value, onChange, onLabel = 'On', offLabel = 'Off' }) {
   return (
@@ -84,6 +85,7 @@ export default function AdminSettings() {
     voiceGender: 'female',
   })
   const [controlsSaving, setControlsSaving] = useState(false)
+  const { confirm, dialog } = usePasswordConfirm()
 
   const [prefs, setPrefs] = useState(() => {
     const stored = readStoredSettings()
@@ -143,21 +145,23 @@ export default function AdminSettings() {
 
   const saveControls = async () => {
     setControlsSaving(true)
-    try {
+    const saved = await confirm(async (password) => {
       await updateRuntimeControls({
         camera_flip_horizontal: controls.cameraFlipHorizontal,
         announcer_enabled: controls.announcerEnabled,
         announcer_volume: controls.announcerVolume,
         alert_mode_enabled: controls.alertModeEnabled,
-      })
-      await updateGestureAttendanceSettings(controls.gestureAttendanceEnabled)
-      await updateVoiceSettings(controls.voiceGender)
-      toast.success('Operational controls updated')
-    } catch (error) {
-      toast.error(error.message || 'Could not save operational controls')
-    } finally {
-      setControlsSaving(false)
-    }
+      }, password)
+      await updateGestureAttendanceSettings(controls.gestureAttendanceEnabled, password)
+      await updateVoiceSettings(controls.voiceGender, password)
+    }, {
+      title: 'Confirm operational controls',
+      description: 'Changing detection, announcer and voice settings requires your account password.',
+      confirmLabel: 'Save controls',
+    })
+    setControlsSaving(false)
+    if (!saved) return
+    toast.success('Operational controls updated')
   }
 
   const savePrefs = () => {
@@ -424,6 +428,8 @@ export default function AdminSettings() {
           </div>
         </div>
       </div>
+
+      {dialog}
     </div>
   )
 }
