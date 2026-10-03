@@ -3,7 +3,19 @@
  * Supabase Realtime handles live DB updates separately.
  */
 
-const WS_URL = import.meta.env.VITE_WEBSOCKET_URL || 'ws://localhost:8000/ws'
+function resolveWsUrl() {
+  const configured = import.meta.env.VITE_WEBSOCKET_URL
+  if (configured) return configured
+  const apiBase = import.meta.env.VITE_API_BASE_URL
+  if (apiBase && apiBase.startsWith('http')) {
+    // Derive from the API base: https://backend.up.railway.app[/api] -> wss://backend.up.railway.app/ws
+    const host = apiBase.replace(/^http/, 'ws').replace(/\/api\/?$/, '')
+    return `${host}/ws`
+  }
+  return 'ws://localhost:8000/ws'
+}
+
+const WS_URL = resolveWsUrl()
 
 class WSClient {
   constructor() {

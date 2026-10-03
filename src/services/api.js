@@ -1,6 +1,10 @@
 import axios from 'axios'
 
-const baseURL = import.meta.env.VITE_API_BASE_URL || '/api'
+const rawBase = import.meta.env.VITE_API_BASE_URL || '/api'
+// Tolerate a configured base without the /api suffix (e.g. "https://backend.up.railway.app").
+const baseURL = rawBase === '/api' || rawBase.endsWith('/api') ? rawBase : `${rawBase.replace(/\/+$/, '')}/api`
+
+export const API_BASE_URL = baseURL
 
 const api = axios.create({
   baseURL,

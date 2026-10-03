@@ -3,10 +3,11 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import toast from 'react-hot-toast'
 import { useApp } from '../../context/AppContext'
+import { API_BASE_URL } from '../../services/api'
 import { readStoredSettings, liveFeedCameraOf, cameraSourceLabel } from '../../utils/settings'
 import CheckinTimeSchedule from './CheckinTimeSchedule'
 
-const streamUrl = '/api/camera/stream'
+const streamUrl = `${API_BASE_URL}/camera/stream`
 
 function formatTime(ts) {
   if (!ts) return 'Just now'

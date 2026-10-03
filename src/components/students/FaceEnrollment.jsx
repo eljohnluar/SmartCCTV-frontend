@@ -1,12 +1,12 @@
 import { Camera, Check, Video, X } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
-import { enrollFace, getGestureAttendanceSettings } from '../../services/api'
+import { API_BASE_URL, enrollFace, getGestureAttendanceSettings } from '../../services/api'
 import { usePasswordConfirm } from '../../hooks/usePasswordConfirm'
 import { enrollmentCameraOf, readStoredSettings, cameraSourceLabel } from '../../utils/settings'
 import Modal from '../common/Modal'
 
-const virtualCameraStream = '/api/camera/stream'
+const virtualCameraStream = `${API_BASE_URL}/camera/stream`
 const CAPTURE_STEPS = [
   { id: 'front', label: 'Front', instruction: 'Look straight at the camera.' },
   { id: 'left', label: 'Turn left', instruction: 'Turn your face slightly to the left.' },
