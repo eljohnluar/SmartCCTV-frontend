@@ -8,11 +8,14 @@ import AdminHeader from './components/common/AdminHeader'
 import NotificationToast from './components/common/NotificationToast'
 
 import Dashboard from './pages/Dashboard'
+import LiveCamera from './pages/LiveCamera'
 import Students from './pages/Students'
+import Profile from './pages/Profile'
 import Reports from './pages/Reports'
 import Alerts from './pages/Alerts'
 import Settings from './pages/Settings'
 import Landing from './pages/Landing'
+import Login from './pages/Login'
 import Credits from './pages/Credits'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import TeacherManagement from './pages/admin/TeacherManagement'
@@ -62,7 +65,7 @@ function AppLayout() {
       <div className="flex h-screen w-screen items-center justify-center bg-[#050811] font-mono text-cyan-400">
         <div className="flex flex-col items-center gap-3">
           <div className="h-10 w-10 animate-spin rounded-full border-2 border-cyan-400 border-t-transparent shadow-[0_0_20px_#00f0ff]" />
-          <span className="text-xs uppercase tracking-widest">// INITIALIZING SMART CCTV CORE...</span>
+          <span className="text-xs uppercase tracking-widest">Loading SmartCCTV…</span>
         </div>
       </div>
     )
@@ -81,6 +84,10 @@ function AppLayout() {
     switch (pathname) {
       case '/':
         return 'Attendance Dashboard'
+      case '/live':
+        return 'Live Camera Feed'
+      case '/profile':
+        return 'My Profile'
       case '/students':
         return 'Student Management'
       case '/reports':
@@ -104,6 +111,8 @@ function AppLayout() {
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-7">
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/live" element={<LiveCamera />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/students" element={<Students />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/alerts" element={<Alerts />} />
@@ -125,7 +134,7 @@ export default function App() {
         <NotificationToast />
         <Routes>
           <Route path="/landing" element={<Landing />} />
-          <Route path="/login" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/credits" element={<Credits />} />
           <Route path="/*" element={<AppLayout />} />
         </Routes>

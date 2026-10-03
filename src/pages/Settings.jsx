@@ -5,12 +5,14 @@ import toast from 'react-hot-toast'
 import { usePasswordConfirm } from '../hooks/usePasswordConfirm'
 import { getGestureAttendanceSettings, getRuntimeControls, getUniformPolicy, getVoiceSettings, updateGestureAttendanceSettings, updateRuntimeControls, updateUniformPolicy, updateVoiceSettings } from '../services/api'
 import { SETTINGS_STORAGE_KEY } from '../utils/settings'
+import AIStatusIndicator from '../components/dashboard/AIStatusIndicator'
 
 const defaultSettings = {
-  cameraIndex: 1,
   cameraFps: 15,
   liveFeedCamera: 'virtual',
   enrollmentCamera: 'webcam',
+  rtspUrl: '',
+  enrollmentRtspUrl: '',
   recognitionThreshold: 0.45,
   recognitionModel: 'Facenet',
   voiceLanguage: 'en',
@@ -146,19 +148,6 @@ export default function Settings() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-slate-400 mb-1.5">
-                    Camera Index / Device ID
-                  </label>
-                  <input
-                    type="number"
-                    value={settings.cameraIndex}
-                    onChange={(e) => handleChange('cameraIndex', parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-2 text-sm bg-[#242836] border border-[#2d3148] rounded-lg text-slate-200 focus:outline-none focus:border-green-500/50"
-                  />
-                  <p className="text-[11px] text-slate-500 mt-1">Default 1 is usually a virtual camera device on Windows.</p>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">
                     Target Capture FPS
                   </label>
                   <input
@@ -179,13 +168,36 @@ export default function Settings() {
                     onChange={(e) => handleChange('liveFeedCamera', e.target.value)}
                     className="w-full px-3 py-2 text-sm bg-[#242836] border border-[#2d3148] rounded-lg text-slate-200 focus:outline-none focus:border-green-500/50"
                   >
-                    <option value="virtual">Virtual Camera</option>
+                    <option value="obs">OBS Studio (WebRTC)</option>
+                    <option value="rtsp">Wired Camera (RTSP)</option>
                     <option value="webcam">Browser webcam</option>
+                    <option value="virtual">Local backend feed</option>
                   </select>
                   <p className="text-[11px] text-slate-500 mt-1">
-                    Virtual Camera shows the monitored CCTV feed with detections. Browser webcam shows this computer&apos;s camera directly, without overlays.
+                    {settings.liveFeedCamera === 'obs' && 'Run the local OBS bridge script on the same computer as OBS — it streams the OBS Virtual Camera to the backend over WebRTC.'}
+                    {settings.liveFeedCamera === 'rtsp' && 'Run the local RTSP bridge script, which relays your camera\u2019s RTSP URL to the backend.'}
+                    {settings.liveFeedCamera === 'webcam' && 'Shows this browser\u2019s camera directly, without AI overlays.'}
+                    {settings.liveFeedCamera === 'virtual' && 'Shows the backend\u2019s own camera capture with AI detection overlays.'}
                   </p>
                 </div>
+
+                {settings.liveFeedCamera === 'rtsp' && (
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                      Live Feed RTSP URL
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.rtspUrl}
+                      onChange={(e) => handleChange('rtspUrl', e.target.value)}
+                      placeholder="rtsp://username:password@192.168.1.10:554/stream"
+                      className="w-full px-3 py-2 text-sm bg-[#242836] border border-[#2d3148] rounded-lg text-slate-200 placeholder-slate-600 focus:outline-none focus:border-green-500/50"
+                    />
+                    <p className="text-[11px] text-slate-500 mt-1">
+                      Used by the local bridge script. Saved on this device only.
+                    </p>
+                  </div>
+                )}
 
                 <div className="sm:col-span-2">
                   <label className="block text-xs font-medium text-slate-400 mb-1.5">
@@ -197,12 +209,35 @@ export default function Settings() {
                     className="w-full px-3 py-2 text-sm bg-[#242836] border border-[#2d3148] rounded-lg text-slate-200 focus:outline-none focus:border-green-500/50"
                   >
                     <option value="webcam">Browser webcam</option>
-                    <option value="virtual">Virtual Camera</option>
+                    <option value="obs">OBS Studio (WebRTC)</option>
+                    <option value="rtsp">Wired Camera (RTSP)</option>
+                    <option value="virtual">Local backend feed</option>
                   </select>
                   <p className="text-[11px] text-slate-500 mt-1">
-                    Browser webcam requests permission. Virtual Camera uses the same live window feed as live monitoring.
+                    {settings.enrollmentCamera === 'webcam' && 'Requests permission to use this browser\u2019s camera for face enrollment photos.'}
+                    {settings.enrollmentCamera === 'obs' && 'Uses the OBS Virtual Camera streamed by the local WebRTC bridge script.'}
+                    {settings.enrollmentCamera === 'rtsp' && 'Uses the wired camera stream relayed by the local RTSP bridge script.'}
+                    {settings.enrollmentCamera === 'virtual' && 'Uses the same backend camera feed as live monitoring.'}
                   </p>
                 </div>
+
+                {settings.enrollmentCamera === 'rtsp' && (
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                      Enrollment RTSP URL
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.enrollmentRtspUrl}
+                      onChange={(e) => handleChange('enrollmentRtspUrl', e.target.value)}
+                      placeholder="rtsp://username:password@192.168.1.10:554/stream"
+                      className="w-full px-3 py-2 text-sm bg-[#242836] border border-[#2d3148] rounded-lg text-slate-200 placeholder-slate-600 focus:outline-none focus:border-green-500/50"
+                    />
+                    <p className="text-[11px] text-slate-500 mt-1">
+                      Used by the local bridge script. Saved on this device only.
+                    </p>
+                  </div>
+                )}
 
                 {/* Camera Flip Toggle */}
                 <div className="sm:col-span-2 flex items-center justify-between rounded-lg border border-[#2d3148] bg-[#242836] px-4 py-3">
@@ -426,6 +461,9 @@ export default function Settings() {
             </div>
           </div>
         </div>
+
+        {/* ── System Health ──────────────────────────────────────────────── */}
+        <AIStatusIndicator />
 
         {/* ── Bottom Full-Width Action Bar with Small Credits Link ────────────── */}
         <div className="flex items-center justify-between rounded-xl border border-[#2d3148] bg-[#1a1d27] p-4 shadow-lg">

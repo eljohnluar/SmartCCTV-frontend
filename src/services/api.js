@@ -19,7 +19,23 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    const message = error.response?.data?.detail || error.message || 'Request failed'
+    let message = 'Request failed'
+    const detail = error.response?.data?.detail
+    if (typeof detail === 'string') {
+      message = detail
+    } else if (Array.isArray(detail) && detail.length > 0) {
+      message = detail
+        .map((d) => {
+          const field = Array.isArray(d.loc) ? d.loc[d.loc.length - 1] : ''
+          const prefix = field && field !== 'body' ? `${field}: ` : ''
+          return `${prefix}${d.msg || JSON.stringify(d)}`
+        })
+        .join('; ')
+    } else if (detail && typeof detail === 'object') {
+      message = detail.msg || JSON.stringify(detail)
+    } else if (error.message) {
+      message = error.message
+    }
     return Promise.reject(new Error(message))
   }
 )
@@ -69,6 +85,7 @@ export const resetAttendance = (password) =>
 
 export const getReportsSummary = (params) => api.get('/reports/summary', { params })
 export const getReportsTrend = (params) => api.get('/reports/trend', { params })
+export const getReportRecords = (params) => api.get('/reports/records', { params })
 export const exportReportCSV = (params) =>
   api.get('/reports/export/csv', { params, responseType: 'blob' })
 export const exportReportPDF = (params) =>

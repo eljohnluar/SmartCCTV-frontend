@@ -3,7 +3,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import toast from 'react-hot-toast'
 import { useApp } from '../../context/AppContext'
-import { readStoredSettings, liveFeedCameraOf } from '../../utils/settings'
+import { readStoredSettings, liveFeedCameraOf, cameraSourceLabel } from '../../utils/settings'
+import CheckinTimeSchedule from './CheckinTimeSchedule'
 
 const streamUrl = '/api/camera/stream'
 
@@ -136,6 +137,7 @@ function FloatingAttendanceGlassModal({ records = [], isOpen, onToggle }) {
 /* ─── Fullscreen Camera Modal ────────────────────────────────────────────── */
 function FullscreenModal({
   isWebcam,
+  sourceLabel,
   videoRef: externalVideoRef,
   streamKey,
   mirrored,
@@ -194,7 +196,7 @@ function FullscreenModal({
           </div>
           <div>
             <p className="text-sm font-semibold text-white">Live camera feed</p>
-            <p className="text-[10px] text-slate-400">Main entrance · {isWebcam ? 'Browser webcam' : 'Virtual camera'}</p>
+            <p className="text-[10px] text-slate-400">Main entrance · {sourceLabel}</p>
           </div>
         </div>
 
@@ -320,11 +322,13 @@ function FullscreenModal({
       </div>
 
       {/* ── Bottom Overlay Bar ── */}
-      <div className="absolute inset-x-0 bottom-0 z-20 pointer-events-none flex items-center justify-between bg-gradient-to-t from-black/80 via-black/30 to-transparent px-6 py-4">
-        <div />
+      <div className="absolute inset-x-0 bottom-0 z-20 pointer-events-none flex items-end gap-3 bg-gradient-to-t from-black/80 via-black/30 to-transparent px-4 pt-12 pb-4 sm:px-6">
+        <div className="pointer-events-auto mx-auto w-full max-w-2xl">
+          <CheckinTimeSchedule overlay />
+        </div>
         <button
           onClick={onClose}
-          className="pointer-events-auto flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-medium text-white/90 backdrop-blur-md transition-all hover:bg-white/20 active:scale-95 shadow-lg"
+          className="pointer-events-auto flex shrink-0 items-center gap-1.5 rounded-xl border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-medium text-white/90 backdrop-blur-md transition-all hover:bg-white/20 active:scale-95 shadow-lg"
         >
           <Minimize2 size={13} /> Exit fullscreen
         </button>
@@ -349,6 +353,8 @@ export default function LiveCameraFeed({ attendanceRecords = [] }) {
 
   const source = liveFeedCameraOf(stored)
   const isWebcam = source === 'webcam'
+  const isBridge = source === 'obs' || source === 'rtsp'
+  const sourceLabel = cameraSourceLabel(source)
 
   const stopWebcam = useCallback(() => {
     streamRef.current?.getTracks().forEach((track) => track.stop())
@@ -413,7 +419,7 @@ export default function LiveCameraFeed({ attendanceRecords = [] }) {
             </div>
             <div>
               <h2 className="text-sm font-semibold text-white">Live camera feed</h2>
-              <p className="text-[11px] text-slate-500">Main entrance · {isWebcam ? 'Browser webcam' : 'Virtual camera'}</p>
+              <p className="text-[11px] text-slate-500">Main entrance · {sourceLabel}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -506,7 +512,9 @@ export default function LiveCameraFeed({ attendanceRecords = [] }) {
               </div>
               <p className="text-sm font-medium text-slate-300">Camera feed is unavailable</p>
               <p className="max-w-sm text-xs">
-                {failReason || 'Confirm the camera is running and the configured device is available.'}
+                {failReason || (isBridge
+                  ? 'Start the local bridge script on the camera computer and confirm it is connected to the backend.'
+                  : 'Confirm the camera is running and the configured device is available.')}
               </p>
               <button
                 onClick={reconnect}
@@ -523,6 +531,7 @@ export default function LiveCameraFeed({ attendanceRecords = [] }) {
       {fullscreen && (
         <FullscreenModal
           isWebcam={isWebcam}
+          sourceLabel={sourceLabel}
           videoRef={videoRef}
           streamKey={streamKey}
           mirrored={mirrored}

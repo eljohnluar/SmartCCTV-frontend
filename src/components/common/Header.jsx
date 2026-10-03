@@ -1,16 +1,31 @@
-import { Bell, RefreshCw, Clock } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { Bell, Clock, IdCard, UserRound } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useApp } from '../../context/AppContext'
+import { useAuth } from '../../context/AuthContext'
 import { todayLabel } from '../../utils/helpers'
 import { SYSTEM_STATUS } from '../../utils/constants'
+import ThemeToggle from './ThemeToggle'
 
 export default function Header({ title }) {
   const { systemStatus, cameraActive, aiActive, notifications, unreadCount, markRead, clearNotifications, refreshStatus } = useApp()
+  const { user } = useAuth()
+  const navigate = useNavigate()
   const [currentTime, setCurrentTime] = useState(new Date())
+  const [profileOpen, setProfileOpen] = useState(false)
+  const profileRef = useRef(null)
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
     return () => clearInterval(timer)
+  }, [])
+
+  useEffect(() => {
+    const handler = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) setProfileOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
   }, [])
 
   // Format in strict 24-hour time (HH:MM:SS)
@@ -54,14 +69,46 @@ export default function Header({ title }) {
           {aiActive && <span className="text-[10px] text-slate-500">AI</span>}
         </div>
 
-        {/* Refresh */}
-        <button
-          onClick={refreshStatus}
-          aria-label="Refresh status"
-          className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
-        >
-          <RefreshCw size={16} />
-        </button>
+        {/* Theme */}
+        <ThemeToggle />
+
+        {/* Profile */}
+        <div className="relative" ref={profileRef}>
+          <button
+            onClick={() => setProfileOpen((open) => !open)}
+            aria-label="Open profile menu"
+            aria-expanded={profileOpen}
+            className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
+          >
+            <UserRound size={16} />
+          </button>
+
+          {profileOpen && (
+            <div className="absolute right-0 top-full z-50 mt-2 w-64 overflow-hidden rounded-xl border border-[#263449] bg-[#111a27] shadow-2xl">
+              <div className="flex items-center gap-3 border-b border-[#263449] px-4 py-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-400/15 text-sm font-bold text-emerald-300">
+                  {(user?.full_name || user?.username || 'T').slice(0, 1).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-white">{user?.full_name || user?.username || 'Teacher'}</p>
+                  <p className="truncate font-mono text-[10px] text-slate-500">@{user?.username || 'teacher'}</p>
+                </div>
+              </div>
+              <div className="p-1.5">
+                <button
+                  onClick={() => {
+                    setProfileOpen(false)
+                    navigate('/profile')
+                  }}
+                  className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm text-slate-300 transition-colors hover:bg-white/5 hover:text-white"
+                >
+                  <IdCard size={15} className="text-emerald-400" />
+                  See my profile
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Notifications */}
         <div className="relative group">

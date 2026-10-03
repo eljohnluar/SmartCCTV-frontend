@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import {
   Shield,
   ArrowLeft,
@@ -17,6 +17,7 @@ import {
   Terminal
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
+import ThemeToggle from '../components/common/ThemeToggle'
 
 // Team members list with photo filenames and roles
 const TEAM_MEMBERS = [
@@ -28,17 +29,17 @@ const TEAM_MEMBERS = [
     slugs: ['rebano', 'rebano_eljohn', 'eljohn_rebano'],
     initials: 'ER',
     specialty: 'Computer Vision & Deep Learning Pipeline',
-    badge: 'CORE // ARCHITECT',
+    badge: 'Core Architect',
   },
   {
     id: 'pablo',
     name: 'Pablo, Christian F.',
     role: 'AI Model & Computer Vision Engineer',
-    subRole: 'YOLOv8 Threat Sentry & Frame Processor',
+    subRole: 'YOLOv8 Threat Detection & Frame Processing',
     slugs: ['pablo', 'pablo_christian', 'christian_pablo'],
     initials: 'CP',
     specialty: 'Object Detection & Threat Heuristics',
-    badge: 'AI // HEURISTICS',
+    badge: 'AI Engineer',
   },
   {
     id: 'dasig',
@@ -48,7 +49,7 @@ const TEAM_MEMBERS = [
     slugs: ['dasig', 'dasig_charles', 'charles_dasig'],
     initials: 'CD',
     specialty: 'Async Stream Ingestion & Microservices',
-    badge: 'BACKEND // ENGINE',
+    badge: 'Backend Engineer',
   },
   {
     id: 'ortega',
@@ -58,27 +59,27 @@ const TEAM_MEMBERS = [
     slugs: ['ortega', 'ortega_jerold', 'jerold_ortega'],
     initials: 'JO',
     specialty: 'Vector Database & Data Security',
-    badge: 'DATABASE // OPS',
+    badge: 'Database Ops',
   },
   {
     id: 'rustia',
     name: 'Rustia, Reynielle N.',
-    role: 'Cyberpunk UI/UX & Frontend Developer',
-    subRole: 'React 19, Tailwind HUD & Real-Time Feeds',
+    role: 'UI/UX & Frontend Developer',
+    subRole: 'React 19, Tailwind & Real-Time Feeds',
     slugs: ['rustia', 'rustia_reynielle', 'reynielle_rustia'],
     initials: 'RR',
     specialty: 'Dynamic Interactive Dashboards',
-    badge: 'FRONTEND // UI/UX',
+    badge: 'UI/UX Frontend',
   },
   {
     id: 'borres',
     name: 'Borres, Earlwyn Kyle T.',
     role: 'Biometric Analytics & QA Engineer',
-    subRole: 'Face Matching Accuracy & Dress Code Sentry',
+    subRole: 'Face Matching Accuracy & Dress Code Checks',
     slugs: ['borres', 'borres_earlwyn', 'earlwyn_borres'],
     initials: 'EB',
     specialty: 'Model Benchmarking & Quality Assurance',
-    badge: 'QA // VALIDATION',
+    badge: 'QA & Validation',
   },
   {
     id: 'limpag',
@@ -88,7 +89,7 @@ const TEAM_MEMBERS = [
     slugs: ['limpag', 'limpag_john', 'john_limpag'],
     initials: 'JL',
     specialty: 'CCTV Hardware Calibration & Deployment',
-    badge: 'HARDWARE // I/O',
+    badge: 'Hardware Integration',
   },
 ]
 
@@ -151,7 +152,7 @@ function MemberPhoto({ slugs = [], initials = '?', name = '' }) {
             {initials}
           </span>
           <span className="mt-1 font-mono text-[9px] uppercase tracking-widest text-cyan-500/80">
-            PHOTO PENDING
+            Photo pending
           </span>
         </div>
 
@@ -175,7 +176,6 @@ function MemberPhoto({ slugs = [], initials = '?', name = '' }) {
 }
 
 export default function Credits() {
-  const navigate = useNavigate()
   const { user } = useAuth()
   const [currentTime, setCurrentTime] = useState(new Date())
 
@@ -189,9 +189,9 @@ export default function Credits() {
 
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden bg-[#050811] text-[#e2e8f0] font-sans selection:bg-cyan-500 selection:text-black">
-      {/* ── Cyberpunk Scanline & Grid Background ───────────────────────────────── */}
+      {/* Background decor */}
       <div
-        className="pointer-events-none fixed inset-0 z-0 opacity-40"
+        className="pointer-events-none fixed inset-0 z-0 cyber-bg"
         style={{
           backgroundImage: `
             radial-gradient(circle at 50% 0%, rgba(0, 240, 255, 0.12), transparent 45%),
@@ -203,9 +203,9 @@ export default function Credits() {
         }}
       />
 
-      {/* CRT Scanline Overlay */}
+      {/* Scanline Overlay */}
       <div
-        className="pointer-events-none fixed inset-0 z-0"
+        className="pointer-events-none fixed inset-0 z-0 cyber-bg"
         style={{
           backgroundImage:
             'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 240, 255, 0.015) 2px, rgba(0, 240, 255, 0.015) 4px)',
@@ -234,14 +234,14 @@ export default function Credits() {
 
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-mono text-base font-extrabold tracking-wider text-white sm:text-lg">
-                  SMART<span className="text-cyan-400">CCTV</span>
+                <span className="text-base font-extrabold tracking-tight text-white sm:text-lg">
+                  Smart<span className="text-cyan-400">CCTV</span>
                 </span>
                 <span className="rounded border border-cyan-400/40 bg-cyan-500/10 px-1.5 py-0.2 font-mono text-[9px] font-bold text-cyan-300">
-                  SYSTEM CREDITS
+                  Credits
                 </span>
               </div>
-              <p className="font-mono text-[10px] tracking-widest text-slate-400 uppercase">
+              <p className="text-[10px] tracking-wide text-slate-400">
                 Bestlink College of the Philippines
               </p>
             </div>
@@ -250,17 +250,19 @@ export default function Credits() {
           {/* Navigation Controls Right */}
           <div className="flex items-center gap-3 sm:gap-6">
             <div className="hidden font-mono text-xs sm:block text-slate-400">
-              <span className="text-cyan-400 mr-1.5">SYS_TIME //</span>
+              <span className="text-cyan-400 mr-1.5">Time</span>
               <span className="text-cyan-200">{time24}</span>
             </div>
 
-            <button
-              onClick={() => navigate(user ? '/' : '/login')}
-              className="flex items-center gap-2 rounded-xl border border-cyan-500/40 bg-cyan-950/40 px-3.5 py-2 font-mono text-xs font-semibold text-cyan-300 shadow-[0_0_15px_rgba(0,240,255,0.15)] transition-all hover:bg-cyan-500/20 hover:text-cyan-100 hover:shadow-[0_0_25px_rgba(0,240,255,0.3)]"
+            {!user && <ThemeToggle />}
+
+            <Link
+              to={user ? '/' : '/landing'}
+              className="flex items-center gap-2 rounded-xl border border-cyan-500/40 bg-cyan-950/40 px-3.5 py-2 text-xs font-semibold text-cyan-300 shadow-[0_0_15px_rgba(0,240,255,0.15)] transition-all hover:bg-cyan-500/20 hover:text-cyan-100 hover:shadow-[0_0_25px_rgba(0,240,255,0.3)]"
             >
               <ArrowLeft size={14} />
-              <span>{user ? 'RETURN TO CONSOLE' : 'BACK TO PORTAL'}</span>
-            </button>
+              <span>{user ? 'Back to dashboard' : 'Back to home'}</span>
+            </Link>
           </div>
         </div>
       </header>
@@ -280,8 +282,8 @@ export default function Credits() {
             {/* Institution Badge */}
             <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-950/60 px-3.5 py-1 text-xs text-cyan-300 shadow-[0_0_15px_rgba(0,240,255,0.2)] mb-6">
               <GraduationCap size={15} className="text-cyan-400" />
-              <span className="font-mono text-[11px] font-bold tracking-widest uppercase">
-                ACADEMIC RESEARCH &amp; DEVELOPMENT
+              <span className="font-medium">
+                Academic research &amp; development
               </span>
             </div>
 
@@ -300,18 +302,18 @@ export default function Credits() {
                   onError={(e) => { e.currentTarget.style.display = 'none' }}
                 />
               </div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-400/60">
-                DEVELOPED BY // C7
+              <p className="text-[10px] uppercase tracking-[0.2em] text-cyan-400/60">
+                Developed by C7
               </p>
             </div>
 
-            <h1 className="text-2xl font-black tracking-wide text-white sm:text-4xl lg:text-5xl">
-              BESTLINK COLLEGE OF THE PHILIPPINES
+            <h1 className="text-2xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
+              Bestlink College of the Philippines
             </h1>
 
 
-            <p className="mt-2 font-mono text-xs uppercase tracking-widest text-cyan-300 sm:text-sm">
-              College of Computer Studies // Information Technology
+            <p className="mt-2 text-xs uppercase tracking-widest text-cyan-300 sm:text-sm">
+              College of Computer Studies · Information Technology
             </p>
 
             <div className="mt-4 max-w-3xl text-xs leading-relaxed text-slate-300 sm:text-sm">
@@ -323,16 +325,16 @@ export default function Credits() {
               </p>
             </div>
 
-            {/* Telemetry Tags */}
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-2.5 font-mono text-[10px]">
+            {/* Info Tags */}
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-2.5 text-[10px]">
               <span className="rounded-lg border border-cyan-500/30 bg-black/40 px-3 py-1 text-cyan-300">
-                CAMPUS: NOVALICHES, QUEZON CITY
+                Campus: Novaliches, Quezon City
               </span>
               <span className="rounded-lg border border-emerald-500/30 bg-black/40 px-3 py-1 text-emerald-300">
-                ACADEMIC YEAR: 2025–2026
+                Academic year: 2025–2026
               </span>
               <span className="rounded-lg border border-purple-500/30 bg-black/40 px-3 py-1 text-purple-300">
-                TECHNOPRENEURSHIP PROJECT &bull; SYSTEM VERSION: 2.6
+                Technopreneurship project · Version 2.6
               </span>
             </div>
           </div>
@@ -343,11 +345,11 @@ export default function Credits() {
           <div className="mb-6 flex items-center justify-between border-b border-cyan-500/20 pb-3">
             <div className="flex items-center gap-2">
               <Award size={18} className="text-cyan-400" />
-              <h2 className="font-mono text-sm font-bold uppercase tracking-widest text-cyan-300">
-                // PROJECT ADVISER &amp; MENTOR
+              <h2 className="text-sm font-bold text-cyan-300">
+                Project adviser &amp; mentor
               </h2>
             </div>
-            <span className="font-mono text-[10px] text-slate-500">FACULTY GUIDANCE</span>
+            <span className="font-mono text-[10px] text-slate-500">Faculty guidance</span>
           </div>
 
           <div className="relative overflow-hidden rounded-2xl border border-cyan-500/40 bg-gradient-to-r from-[#091428] to-[#070e1c] p-6 shadow-[0_0_35px_rgba(0,240,255,0.15)] sm:p-8">
@@ -367,7 +369,7 @@ export default function Credits() {
               <div className="flex-1 text-center sm:text-left">
                 <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-950/40 px-2.5 py-0.5 font-mono text-[10px] font-bold text-emerald-300 mb-2">
                   <Sparkles size={11} className="text-emerald-400" />
-                  <span>PROJECT ADVISER</span>
+                  <span>Project adviser</span>
                 </div>
 
                 <h3 className="text-2xl font-extrabold text-white sm:text-3xl">
@@ -388,10 +390,10 @@ export default function Credits() {
 
                 <div className="mt-4 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
                   <span className="rounded-md border border-cyan-500/20 bg-cyan-950/30 px-2.5 py-1 font-mono text-[10px] text-cyan-300">
-                    ADVISER CODE: ADVISER-BCP
+                    Adviser code: ADVISER-BCP
                   </span>
                   <span className="rounded-md border border-slate-700 bg-slate-900/50 px-2.5 py-1 font-mono text-[10px] text-slate-400">
-                    TECHNOPRENEURSHIP ADVISORY COUNCIL
+                    Technopreneurship Advisory Council
                   </span>
                 </div>
               </div>
@@ -404,12 +406,12 @@ export default function Credits() {
           <div className="mb-6 flex items-center justify-between border-b border-cyan-500/20 pb-3">
             <div className="flex items-center gap-2">
               <Code2 size={18} className="text-cyan-400" />
-              <h2 className="font-mono text-sm font-bold uppercase tracking-widest text-cyan-300">
-                // DEVELOPMENT &amp; RESEARCH TEAM
+              <h2 className="text-sm font-bold text-cyan-300">
+                Development &amp; research team
               </h2>
             </div>
             <span className="font-mono text-[10px] text-slate-500">
-              7 VERIFIED OPERATORS
+              7 team members
             </span>
           </div>
 
@@ -429,7 +431,7 @@ export default function Credits() {
                 {/* Index tag & Badge */}
                 <div className="mb-3.5 flex items-center justify-between font-mono text-[10px]">
                   <span className="text-cyan-400/80 font-bold">
-                    0{index + 1} // ENG
+                    0{index + 1}
                   </span>
                   <span className="rounded bg-cyan-500/10 px-1.5 py-0.5 text-cyan-300 font-bold border border-cyan-500/20">
                     {member.badge}
@@ -462,7 +464,7 @@ export default function Credits() {
                   </p>
 
                   <div className="mt-3 rounded-lg border border-slate-800 bg-[#040810]/70 p-2 font-mono text-[10px] text-slate-400">
-                    <span className="text-cyan-400 font-bold">SPECIALTY: </span>
+                    <span className="text-cyan-400 font-bold">Specialty: </span>
                     {member.specialty}
                   </div>
                 </div>
@@ -471,9 +473,9 @@ export default function Credits() {
                 <div className="mt-4 flex items-center justify-between border-t border-slate-800 pt-3 font-mono text-[10px] text-slate-500">
                   <span className="flex items-center gap-1 text-emerald-400">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    VERIFIED
+                    Verified
                   </span>
-                  <span className="text-slate-500">BCP-STUDENT</span>
+                  <span className="text-slate-500">BCP student</span>
                 </div>
               </div>
             ))}
@@ -485,12 +487,12 @@ export default function Credits() {
           <div className="mb-6 flex items-center justify-between border-b border-cyan-500/20 pb-3">
             <div className="flex items-center gap-2">
               <Layers size={18} className="text-cyan-400" />
-              <h2 className="font-mono text-sm font-bold uppercase tracking-widest text-cyan-300">
-                // SYSTEM ARCHITECTURE &amp; TECHNOLOGIES
+              <h2 className="text-sm font-bold text-cyan-300">
+                System architecture &amp; technologies
               </h2>
             </div>
             <span className="font-mono text-[10px] text-slate-500">
-              HIGH-PERFORMANCE STACK
+              Technology stack
             </span>
           </div>
 
@@ -508,7 +510,7 @@ export default function Credits() {
             <div className="rounded-xl border border-slate-800 bg-black/40 p-4">
               <div className="flex items-center gap-2 text-emerald-400 font-bold">
                 <Radio size={15} />
-                <span>YOLOv8 Threat Sentry</span>
+                <span>YOLOv8 Threat Detection</span>
               </div>
               <p className="mt-2 text-[11px] font-sans text-slate-400">
                 Ultralytics YOLOv8 object detection scanning video frames 3x/sec for bladed weapons, firearms, and hazardous materials.
@@ -548,10 +550,10 @@ export default function Credits() {
             <div className="rounded-xl border border-slate-800 bg-black/40 p-4">
               <div className="flex items-center gap-2 text-pink-400 font-bold">
                 <Terminal size={15} />
-                <span>Futuristic React HUD</span>
+                <span>React Web Dashboard</span>
               </div>
               <p className="mt-2 text-[11px] font-sans text-slate-400">
-                Next-gen responsive web portal with real-time video overlay feeds, audio announcer synthesis, and telemetry dashboards.
+                Responsive web portal with real-time video feeds, audio announcements, and attendance dashboards.
               </p>
             </div>
           </div>
@@ -561,12 +563,12 @@ export default function Credits() {
       {/* ── Minimalist Cyber Footer ────────────────────────────────────────── */}
       <footer className="relative z-20 border-t border-cyan-500/20 bg-[#040711]/95 px-4 py-6 backdrop-blur-md sm:px-8">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 text-center sm:flex-row sm:text-left">
-          <div className="flex flex-wrap items-center justify-center gap-2 font-mono text-[11px] text-slate-500 sm:justify-start">
-            <span className="text-cyan-400">SMART CCTV</span>
+          <div className="flex flex-wrap items-center justify-center gap-2 text-[11px] text-slate-500 sm:justify-start">
+            <span className="text-cyan-400">SmartCCTV</span>
             <span className="text-slate-700">|</span>
-            <span>BESTLINK COLLEGE OF THE PHILIPPINES</span>
+            <span>Bestlink College of the Philippines</span>
             <span className="text-slate-700">|</span>
-            <span>RESEARCH TEAM &copy; {new Date().getFullYear()}</span>
+            <span>Research team &copy; {new Date().getFullYear()}</span>
           </div>
 
           {!user && (

@@ -1,9 +1,17 @@
-import { Edit2, Scan, Search, Trash2, UserPlus } from 'lucide-react'
+import { Download, Edit2, Printer, Scan, Search, Trash2, UserPlus } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import toast from 'react-hot-toast'
 import { useAuth } from '../../context/AuthContext'
 import { assignableSections } from '../../utils/constants'
 import { getInitials } from '../../utils/helpers'
 import LoadingSpinner from '../common/LoadingSpinner'
+
+const escapeHtml = (value) =>
+  String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
 
 export default function StudentList({ students, loading, onAdd, onEdit, onDelete, onEnroll }) {
   const { user } = useAuth()
@@ -26,6 +34,91 @@ export default function StudentList({ students, loading, onAdd, onEdit, onDelete
     return matchSearch && matchSection
   }), [students, search, sectionFilter])
 
+  const exportScopeLabel = useMemo(() => {
+    const parts = []
+    if (sectionFilter) parts.push(`Section: ${sectionFilter}`)
+    if (search.trim()) parts.push(`Search: "${search.trim()}"`)
+    return parts.length ? parts.join(' · ') : 'All students'
+  }, [sectionFilter, search])
+
+  const handleExportCSV = () => {
+    if (filtered.length === 0) {
+      toast.error('No students to export.')
+      return
+    }
+    const headers = ['Name', 'Student ID', 'Section', 'Year Level', 'Face Enrollment']
+    const rows = filtered.map((s) => [
+      `"${String(s.full_name ?? '').replace(/"/g, '""')}"`,
+      s.student_id || '',
+      `"${String(s.section ?? '').replace(/"/g, '""')}"`,
+      s.grade_level || '',
+      s.has_face ? `Enrolled${s.gesture_enrolled ? ' (Palm)' : ''}` : 'None',
+    ])
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n')
+    const link = document.createElement('a')
+    link.setAttribute('href', encodeURI(csvContent))
+    link.setAttribute('download', `students_${new Date().toISOString().split('T')[0]}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    toast.success('Student list exported as CSV.')
+  }
+
+  const handleExportPDF = () => {
+    if (filtered.length === 0) {
+      toast.error('No students to export.')
+      return
+    }
+    const printWindow = window.open('', '_blank', 'width=900,height=700')
+    if (!printWindow) {
+      toast.error('Please allow pop-ups to export the PDF.')
+      return
+    }
+
+    const rows = filtered.map((s) => `
+      <tr>
+        <td>${escapeHtml(s.full_name)}</td>
+        <td>${escapeHtml(s.student_id)}</td>
+        <td>${escapeHtml(s.section)}</td>
+        <td>${escapeHtml(s.grade_level)}</td>
+        <td>${escapeHtml(s.has_face ? `Enrolled${s.gesture_enrolled ? ' · Palm' : ''}` : 'None')}</td>
+      </tr>`).join('')
+
+    printWindow.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Student Roster</title>
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; color: #111827; margin: 24px; }
+    h1 { font-size: 20px; margin: 0 0 4px; }
+    .scope { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .meta { font-size: 11px; color: #6b7280; margin-bottom: 16px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { border: 1px solid #d1d5db; padding: 6px 8px; text-align: left; }
+    th { background: #f3f4f6; }
+    tr:nth-child(even) td { background: #f9fafb; }
+    .footer { margin-top: 16px; font-size: 10px; color: #9ca3af; }
+    @media print { .footer { position: fixed; bottom: 0; } }
+  </style>
+</head>
+<body>
+  <h1>SmartCCTV · Student Roster</h1>
+  <p class="scope">${escapeHtml(exportScopeLabel)}</p>
+  <p class="meta">Generated on ${escapeHtml(new Date().toLocaleString())} · ${filtered.length} student${filtered.length === 1 ? '' : 's'}</p>
+  <table>
+    <thead>
+      <tr><th>Name</th><th>Student ID</th><th>Section</th><th>Year Level</th><th>Face Enrollment</th></tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <p class="footer">SmartCCTV — AI Vision &amp; Attendance System</p>
+  <script>window.onload = function () { setTimeout(function () { window.focus(); window.print(); }, 300); }</script>
+</body>
+</html>`)
+    printWindow.document.close()
+  }
+
   return (
     <div className="bg-[#1a1d27] border border-[#2d3148] rounded-xl overflow-hidden">
       {/* Toolbar */}
@@ -42,6 +135,14 @@ export default function StudentList({ students, loading, onAdd, onEdit, onDelete
             <option value="">All Sections</option>
             {sections.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
+          <button onClick={handleExportPDF}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#242836] border border-[#2d3148] rounded-lg text-slate-300 hover:border-green-500/30 hover:text-green-400 transition-colors">
+            <Printer size={13} /> Export PDF
+          </button>
+          <button onClick={handleExportCSV}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#242836] border border-[#2d3148] rounded-lg text-slate-300 hover:border-green-500/30 hover:text-green-400 transition-colors">
+            <Download size={13} /> Export CSV
+          </button>
           <button onClick={onAdd}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-green-500 text-black rounded-lg hover:bg-green-400 transition-colors">
             <UserPlus size={13} /> Add Student

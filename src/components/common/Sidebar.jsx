@@ -7,6 +7,7 @@ import {
   Settings,
   Shield,
   Users,
+  Video,
   LogOut,
 } from 'lucide-react'
 import { NavLink, useNavigate } from 'react-router-dom'
@@ -15,6 +16,7 @@ import { useAuth } from '../../context/AuthContext'
 
 const navItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/live', label: 'Live Feed', icon: Video },
   { to: '/students', label: 'Students', icon: Users },
   { to: '/reports', label: 'Reports', icon: BarChart3 },
   { to: '/alerts', label: 'Alerts', icon: AlertTriangle },
@@ -46,7 +48,7 @@ export default function Sidebar() {
         {sidebarOpen && (
           <div className="overflow-hidden max-lg:hidden">
             <p className="whitespace-nowrap text-sm font-semibold leading-tight text-white">SmartCCTV</p>
-            <p className="whitespace-nowrap text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">AI-Powered System</p>
+            <p className="whitespace-nowrap text-[10px] font-medium tracking-[0.12em] text-slate-500">AI-powered system</p>
           </div>
         )}
       </div>
@@ -113,7 +115,7 @@ export default function Sidebar() {
             className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/10 hover:text-red-300"
           >
             <LogOut size={16} className="shrink-0" />
-            {sidebarOpen && <span className="max-lg:hidden font-mono text-[11px]">Sign Out</span>}
+            {sidebarOpen && <span className="max-lg:hidden">Sign Out</span>}
           </button>
         )}
       </div>

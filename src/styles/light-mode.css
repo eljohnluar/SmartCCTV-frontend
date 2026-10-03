@@ -1,0 +1,363 @@
+/*
+ * Light mode remap.
+ *
+ * The app's components use hardcoded dark utilities. Under <html class="light">
+ * this unlayered stylesheet overrides them with a light palette (unlayered
+ * author styles win over Tailwind v4's layered utilities).
+ */
+
+/* ---------- Document chrome ---------- */
+
+html.light body {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+html.light ::selection {
+  background: rgba(16, 185, 129, 0.25);
+  color: #064e3b;
+}
+
+/* ---------- Clean SaaS polish (light mode) ---------- */
+
+/* Hide cyberpunk scanline / grid overlays in light mode */
+html.light .cyber-bg { display: none; }
+
+/* Flatten neon glow shadows into soft SaaS shadows */
+html.light [class*="shadow-[0_0"] {
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 4px 14px rgba(15, 23, 42, 0.06);
+}
+html.light [class*="drop-shadow-"] { filter: none; }
+html.light [style*="text-shadow"] { text-shadow: none !important; }
+
+/* Softer focus rings */
+html.light .focus\:ring-cyan-400:focus,
+html.light .focus\:ring-emerald-400:focus,
+html.light .focus\:ring-emerald-500\/30:focus {
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+}
+
+html.light ::-webkit-scrollbar-track { background: #e2e8f0; }
+html.light ::-webkit-scrollbar-thumb { background: #cbd5e1; }
+html.light ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* ---------- App / hero backgrounds ---------- */
+
+html.light .bg-\[\#080e1d\],
+html.light .bg-\[\#080e1d\]\/70,
+html.light .bg-\[\#080d15\],
+html.light .bg-\[\#050811\],
+html.light .bg-\[\#070c18\],
+html.light .bg-\[\#070d18\]\/70,
+html.light .bg-\[\#050b17\],
+html.light .bg-\[\#040711\],
+html.light .bg-\[\#040711\]\/90,
+html.light .bg-\[\#040711\]\/95,
+html.light .bg-\[\#040810\],
+html.light .bg-\[\#040810\]\/70,
+html.light .bg-\[\#060a14\],
+html.light .bg-\[\#060a15\],
+html.light .bg-\[\#060b16\],
+html.light .bg-\[\#060e1d\],
+html.light .bg-\[\#070e1c\],
+html.light .bg-\[\#080d19\]\/80,
+html.light .bg-\[\#080d19\]\/85,
+html.light .bg-\[\#080d15\]\/80,
+html.light .bg-\[\#080e1d\]\/80 {
+  background-color: #eef2f8;
+}
+
+html.light .bg-\[\#091122\]\/70,
+html.light .bg-\[\#0a1224\],
+html.light .bg-\[\#0a1426\],
+html.light .bg-\[\#091428\],
+html.light .bg-\[\#091222\],
+html.light .bg-\[\#071124\],
+html.light .bg-\[\#0d221b\],
+html.light .bg-\[\#0d1521\]\/40,
+html.light .bg-\[\#0d1521\]\/50,
+html.light .bg-\[\#0d1521\]\/60,
+html.light .bg-\[\#0d1521\]\/95 {
+  background-color: #e6ecf5;
+}
+
+/* ---------- Panels ---------- */
+
+html.light .bg-\[\#1a1d27\],
+html.light .bg-\[\#111a27\],
+html.light .bg-\[\#111a27\]\/80,
+html.light .bg-\[\#111a27\]\/90,
+html.light .bg-\[\#0f1117\] {
+  background-color: #ffffff;
+}
+
+html.light .bg-\[\#172235\],
+html.light .bg-\[\#172235\]\/70 {
+  background-color: #f1f5f9;
+}
+
+html.light .bg-\[\#242836\] {
+  background-color: #f8fafc;
+}
+
+html.light .bg-\[\#2d3148\],
+html.light .bg-\[\#263449\],
+html.light .bg-\[\#3b536f\] {
+  background-color: #e2e8f0;
+}
+
+html.light .bg-white\/5 { background-color: #f1f5f9; }
+html.light .bg-white\/8,
+html.light .bg-white\/10 { background-color: #eef2f7; }
+html.light .bg-white\/15,
+html.light .bg-white\/20 { background-color: #e8eef6; }
+
+html.light .hover\:bg-white\/5:hover { background-color: #e9eef6; }
+html.light .hover\:bg-white\/10:hover { background-color: #e2e8f0; }
+html.light .hover\:bg-white\/20:hover { background-color: #dbe4ef; }
+html.light .hover\:bg-white\/25:hover { background-color: #d8e2ee; }
+
+/* Slate-tinted chips (deep dark grays only; mid grays stay) */
+html.light .bg-slate-800\/70,
+html.light .bg-slate-800\/80 { background-color: #f8fafc; }
+html.light .bg-slate-500\/10 { background-color: rgba(100, 116, 139, 0.12); }
+
+/* ---------- Text ---------- */
+
+html.light .text-white,
+html.light .text-white\/90,
+html.light .text-white\/85,
+html.light .text-white\/80,
+html.light .text-white\/75,
+html.light .text-white\/70,
+html.light .text-white\/60,
+html.light .text-\[\#f1f5f9\] { color: #0f172a; }
+
+html.light .text-\[\#e2e8f0\],
+html.light .text-slate-100,
+html.light .text-slate-200 { color: #1e293b; }
+html.light .text-slate-300 { color: #334155; }
+html.light .text-slate-400,
+html.light .text-slate-700 { color: #475569; }
+html.light .text-slate-500,
+html.light .text-slate-600 { color: #64748b; }
+
+html.light .text-emerald-200,
+html.light .text-emerald-300,
+html.light .text-emerald-300\/75,
+html.light .text-emerald-300\/90 { color: #047857; }
+html.light .text-emerald-400,
+html.light .text-emerald-400\/80,
+html.light .text-emerald-400\/90 { color: #059669; }
+
+html.light .text-cyan-100,
+html.light .text-cyan-200 { color: #155e75; }
+html.light .text-cyan-300,
+html.light .text-cyan-300\/70 { color: #0e7490; }
+html.light .text-cyan-400,
+html.light .text-cyan-400\/60,
+html.light .text-cyan-400\/70,
+html.light .text-cyan-400\/80,
+html.light .text-cyan-500\/80 { color: #0891b2; }
+
+html.light .text-amber-200,
+html.light .text-amber-300 { color: #b45309; }
+html.light .text-amber-400 { color: #d97706; }
+
+html.light .text-red-300,
+html.light .text-red-400 { color: #dc2626; }
+
+html.light .text-green-300,
+html.light .text-green-400 { color: #16a34a; }
+
+html.light .text-purple-300 { color: #7e22ce; }
+html.light .text-purple-400 { color: #9333ea; }
+html.light .text-pink-400 { color: #db2777; }
+html.light .text-teal-400 { color: #0d9488; }
+
+html.light .border-purple-400\/50 { border-color: rgba(168, 85, 247, 0.65); }
+html.light .border-purple-500\/20 { border-color: rgba(168, 85, 247, 0.40); }
+html.light .border-purple-500\/30 { border-color: rgba(168, 85, 247, 0.50); }
+html.light .border-blue-700 { border-color: #1d4ed8; }
+
+html.light .bg-purple-500\/10 { background-color: rgba(168, 85, 247, 0.10); }
+html.light .bg-blue-900 { background-color: rgba(29, 78, 216, 0.14); }
+
+html.light .placeholder-slate-600::placeholder { color: #94a3b8; }
+
+/* ---------- Borders & dividers ---------- */
+
+html.light .border-\[\#2d3148\] { border-color: #e2e8f0; }
+html.light .border-\[\#263449\] { border-color: #d8e0eb; }
+html.light .border-\[\#2b3b51\] { border-color: #d3dce8; }
+html.light .border-\[\#3b536f\] { border-color: #cbd5e1; }
+
+html.light .border-white\/6,
+html.light .border-white\/8,
+html.light .border-white\/10,
+html.light .border-white\/15,
+html.light .border-white\/20 { border-color: #e2e8f0; }
+
+html.light .border-slate-800 { border-color: #e2e8f0; }
+html.light .border-slate-700 { border-color: #d8e0eb; }
+html.light .border-slate-600,
+html.light .border-slate-600\/40 { border-color: #cbd5e1; }
+html.light .border-slate-500\/20,
+html.light .border-slate-500\/30,
+html.light .border-slate-500\/60 { border-color: rgba(100, 116, 139, 0.35); }
+
+html.light .divide-\[\#2d3148\],
+html.light .divide-\[\#263449\],
+html.light .divide-white\/6 { border-color: #e2e8f0; }
+
+/* Accent borders: raise faint opacities so they stay visible on white */
+html.light .border-emerald-400\/20 { border-color: rgba(16, 185, 129, 0.40); }
+html.light .border-emerald-400\/25 { border-color: rgba(16, 185, 129, 0.45); }
+html.light .border-emerald-400\/30 { border-color: rgba(16, 185, 129, 0.50); }
+html.light .border-emerald-400\/40 { border-color: rgba(16, 185, 129, 0.55); }
+html.light .border-emerald-400\/50 { border-color: rgba(16, 185, 129, 0.60); }
+html.light .border-emerald-500\/20 { border-color: rgba(16, 185, 129, 0.40); }
+html.light .border-emerald-500\/30 { border-color: rgba(16, 185, 129, 0.50); }
+html.light .border-emerald-500\/40 { border-color: rgba(16, 185, 129, 0.55); }
+html.light .border-emerald-500\/50 { border-color: rgba(16, 185, 129, 0.60); }
+
+html.light .border-cyan-400\/20 { border-color: rgba(8, 145, 178, 0.30); }
+html.light .border-cyan-400\/25 { border-color: rgba(8, 145, 178, 0.35); }
+html.light .border-cyan-400\/30 { border-color: rgba(8, 145, 178, 0.40); }
+html.light .border-cyan-400\/40 { border-color: rgba(8, 145, 178, 0.50); }
+html.light .border-cyan-400\/50 { border-color: rgba(8, 145, 178, 0.60); }
+html.light .border-cyan-400\/60 { border-color: rgba(8, 145, 178, 0.65); }
+html.light .border-cyan-400\/80 { border-color: rgba(8, 145, 178, 0.85); }
+html.light .border-cyan-500\/15 { border-color: rgba(6, 182, 212, 0.30); }
+html.light .border-cyan-500\/20 { border-color: rgba(6, 182, 212, 0.35); }
+html.light .border-cyan-500\/25 { border-color: rgba(6, 182, 212, 0.40); }
+html.light .border-cyan-500\/30 { border-color: rgba(6, 182, 212, 0.45); }
+html.light .border-cyan-500\/40 { border-color: rgba(6, 182, 212, 0.55); }
+html.light .border-cyan-500\/50 { border-color: rgba(6, 182, 212, 0.65); }
+
+html.light .border-amber-400\/20 { border-color: rgba(245, 158, 11, 0.40); }
+html.light .border-amber-400\/50 { border-color: rgba(245, 158, 11, 0.65); }
+html.light .border-amber-500\/20 { border-color: rgba(245, 158, 11, 0.40); }
+html.light .border-amber-500\/30 { border-color: rgba(245, 158, 11, 0.50); }
+html.light .border-amber-500\/40 { border-color: rgba(245, 158, 11, 0.55); }
+html.light .border-amber-500\/50 { border-color: rgba(245, 158, 11, 0.65); }
+
+html.light .border-red-500\/20 { border-color: rgba(239, 68, 68, 0.40); }
+html.light .border-red-500\/30 { border-color: rgba(239, 68, 68, 0.50); }
+html.light .border-red-500\/40 { border-color: rgba(239, 68, 68, 0.55); }
+
+html.light .border-green-500\/30 { border-color: rgba(34, 197, 94, 0.50); }
+html.light .border-green-500\/40 { border-color: rgba(34, 197, 94, 0.55); }
+html.light .border-green-500\/50 { border-color: rgba(34, 197, 94, 0.65); }
+
+/* ---------- Tinted chips ---------- */
+
+html.light .bg-cyan-400\/10 { background-color: rgba(8, 145, 178, 0.10); }
+html.light .bg-cyan-400\/20 { background-color: rgba(8, 145, 178, 0.15); }
+html.light .bg-cyan-500\/10 { background-color: rgba(6, 182, 212, 0.10); }
+html.light .bg-cyan-500\/20 { background-color: rgba(6, 182, 212, 0.15); }
+html.light .bg-cyan-950\/30 { background-color: rgba(14, 116, 144, 0.08); }
+html.light .bg-cyan-950\/40 { background-color: rgba(14, 116, 144, 0.10); }
+html.light .bg-cyan-950\/50 { background-color: rgba(14, 116, 144, 0.12); }
+html.light .bg-cyan-950\/60 { background-color: rgba(14, 116, 144, 0.14); }
+
+html.light .bg-emerald-400\/5 { background-color: rgba(16, 185, 129, 0.07); }
+html.light .bg-emerald-400\/10 { background-color: rgba(16, 185, 129, 0.10); }
+html.light .bg-emerald-400\/15 { background-color: rgba(16, 185, 129, 0.13); }
+html.light .bg-emerald-400\/20 { background-color: rgba(16, 185, 129, 0.16); }
+html.light .bg-emerald-400\/25 { background-color: rgba(16, 185, 129, 0.20); }
+html.light .bg-emerald-400\/70 { background-color: rgba(16, 185, 129, 0.70); }
+html.light .bg-emerald-500\/10 { background-color: rgba(16, 185, 129, 0.10); }
+html.light .bg-emerald-500\/20 { background-color: rgba(16, 185, 129, 0.16); }
+html.light .bg-emerald-500\/30 { background-color: rgba(16, 185, 129, 0.22); }
+html.light .bg-emerald-950\/20 { background-color: rgba(6, 95, 70, 0.08); }
+html.light .bg-emerald-950\/40 { background-color: rgba(6, 95, 70, 0.12); }
+
+html.light .bg-amber-400\/10 { background-color: rgba(245, 158, 11, 0.12); }
+html.light .bg-amber-400\/20 { background-color: rgba(245, 158, 11, 0.16); }
+html.light .bg-amber-500\/10 { background-color: rgba(245, 158, 11, 0.12); }
+html.light .bg-amber-500\/20 { background-color: rgba(245, 158, 11, 0.16); }
+html.light .bg-amber-950\/20 { background-color: rgba(146, 64, 14, 0.10); }
+
+html.light .bg-red-400\/10 { background-color: rgba(239, 68, 68, 0.10); }
+html.light .bg-red-400\/20 { background-color: rgba(239, 68, 68, 0.15); }
+html.light .bg-red-500\/10 { background-color: rgba(239, 68, 68, 0.10); }
+html.light .bg-red-500\/20 { background-color: rgba(239, 68, 68, 0.15); }
+html.light .bg-red-900 { background-color: rgba(220, 38, 38, 0.15); }
+
+html.light .bg-green-500\/10 { background-color: rgba(34, 197, 94, 0.12); }
+html.light .bg-green-500\/20 { background-color: rgba(34, 197, 94, 0.16); }
+
+/* ---------- Dark gradient surfaces (landing / auth) ---------- */
+
+html.light .from-\[\#0a1224\],
+html.light .from-\[\#0a1426\],
+html.light .from-\[\#091428\],
+html.light .from-\[\#091222\],
+html.light .from-\[\#071124\] {
+  --tw-gradient-from: #ffffff;
+}
+html.light .via-\[\#091730\],
+html.light .via-\[\#060b16\] {
+  --tw-gradient-via: #f1f5f9;
+}
+html.light .to-\[\#070e1c\],
+html.light .to-\[\#060e1d\],
+html.light .to-\[\#060a15\],
+html.light .to-\[\#060a14\],
+html.light .to-\[\#040810\] {
+  --tw-gradient-to: #e2e8f0;
+}
+
+/* ---------- Solid accent chips that keep light text ---------- */
+
+html.light .bg-red-500,
+html.light .bg-red-500\/80,
+html.light .bg-red-400 { color: #ffffff; }
+
+/* ---------- Text sitting on kept-dark overlays stays light ---------- */
+
+html.light [class*="bg-black/"] :is(.text-white, .text-white\/90, .text-white\/85, .text-white\/80, .text-white\/75, .text-white\/70, .text-white\/60),
+html.light [class*="from-black/"] :is(.text-white, .text-white\/90, .text-white\/85, .text-white\/80, .text-white\/75, .text-white\/70, .text-white\/60),
+html.light [class*="via-black/"] :is(.text-white, .text-white\/90, .text-white\/85, .text-white\/80, .text-white\/75, .text-white\/70, .text-white\/60),
+html.light .bg-black :is(.text-white, .text-white\/90, .text-white\/85, .text-white\/80, .text-white\/75, .text-white\/70, .text-white\/60),
+html.light [class*="bg-slate-900"] :is(.text-white, .text-white\/90, .text-white\/85, .text-white\/80, .text-white\/75, .text-white\/70, .text-white\/60) {
+  color: #f8fafc;
+}
+
+html.light [class*="bg-black/"] :is(.text-slate-100, .text-slate-200),
+html.light [class*="from-black/"] :is(.text-slate-100, .text-slate-200),
+html.light [class*="via-black/"] :is(.text-slate-100, .text-slate-200) { color: #e2e8f0; }
+html.light [class*="bg-black/"] :is(.text-slate-300, .text-slate-400),
+html.light [class*="from-black/"] :is(.text-slate-300, .text-slate-400),
+html.light [class*="via-black/"] :is(.text-slate-300, .text-slate-400) { color: #94a3b8; }
+
+html.light [class*="bg-black/"] :is(.text-emerald-200, .text-emerald-300, .text-emerald-300\/75, .text-emerald-300\/90, .text-emerald-400, .text-emerald-400\/80, .text-emerald-400\/90),
+html.light [class*="from-black/"] :is(.text-emerald-200, .text-emerald-300, .text-emerald-300\/75, .text-emerald-300\/90, .text-emerald-400, .text-emerald-400\/80, .text-emerald-400\/90),
+html.light [class*="via-black/"] :is(.text-emerald-200, .text-emerald-300, .text-emerald-300\/75, .text-emerald-300\/90, .text-emerald-400, .text-emerald-400\/80, .text-emerald-400\/90) { color: #34d399; }
+
+html.light [class*="bg-black/"] :is(.text-cyan-100, .text-cyan-200, .text-cyan-300, .text-cyan-300\/70, .text-cyan-400, .text-cyan-400\/60, .text-cyan-400\/70, .text-cyan-400\/80, .text-cyan-500\/80),
+html.light [class*="from-black/"] :is(.text-cyan-100, .text-cyan-200, .text-cyan-300, .text-cyan-300\/70, .text-cyan-400, .text-cyan-400\/60, .text-cyan-400\/70, .text-cyan-400\/80, .text-cyan-500\/80),
+html.light [class*="via-black/"] :is(.text-cyan-100, .text-cyan-200, .text-cyan-300, .text-cyan-300\/70, .text-cyan-400, .text-cyan-400\/60, .text-cyan-400\/70, .text-cyan-400\/80, .text-cyan-500\/80) { color: #22d3ee; }
+
+html.light [class*="bg-black/"] :is(.text-amber-200, .text-amber-300, .text-amber-400),
+html.light [class*="from-black/"] :is(.text-amber-200, .text-amber-300, .text-amber-400),
+html.light [class*="via-black/"] :is(.text-amber-200, .text-amber-300, .text-amber-400) { color: #fbbf24; }
+
+html.light [class*="bg-black/"] :is(.text-red-300, .text-red-400),
+html.light [class*="from-black/"] :is(.text-red-300, .text-red-400),
+html.light [class*="via-black/"] :is(.text-red-300, .text-red-400) { color: #f87171; }
+
+html.light [class*="bg-black/"] :is(.text-green-300, .text-green-400),
+html.light [class*="from-black/"] :is(.text-green-300, .text-green-400),
+html.light [class*="via-black/"] :is(.text-green-300, .text-green-400) { color: #4ade80; }
+
+/* ---------- Heavy black drop shadows ---------- */
+
+html.light .shadow-\[0_30px_80px_rgba\(0\,0\,0\,0\.55\)\] { box-shadow: 0 30px 80px rgba(15, 23, 42, 0.12); }
+html.light .shadow-\[0_25px_60px_rgba\(0\,0\,0\,0\.65\)\,0_0_30px_rgba\(16\,185\,129\,0\.12\)\] { box-shadow: 0 25px 60px rgba(15, 23, 42, 0.12); }
+html.light .shadow-\[0_20px_55px_rgba\(0\,0\,0\,0\.22\)\] { box-shadow: 0 20px 55px rgba(15, 23, 42, 0.10); }
+html.light .shadow-\[0_20px_55px_rgba\(0\,0\,0\,0\.18\)\] { box-shadow: 0 20px 55px rgba(15, 23, 42, 0.09); }
+html.light .shadow-\[0_20px_45px_rgba\(0\,0\,0\,0\.6\)\,0_0_20px_rgba\(16\,185\,129\,0\.18\)\] { box-shadow: 0 20px 45px rgba(15, 23, 42, 0.12); }
+html.light .shadow-\[0_18px_45px_rgba\(0\,0\,0\,0\.12\)\] { box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08); }
+html.light .shadow-\[0_16px_40px_rgba\(0\,0\,0\,0\.18\)\] { box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08); }

@@ -8,11 +8,24 @@ export function readStoredSettings() {
   }
 }
 
-/** Which camera the dashboard live window shows: the server's virtual camera stream or this device's browser webcam. */
+const CAMERA_SOURCES = ['webcam', 'virtual', 'obs', 'rtsp']
+
+/** Which camera the dashboard live window shows: browser webcam, backend stream (virtual), or a bridge-fed source (obs/rtsp via the backend). */
 export function liveFeedCameraOf(settings) {
-  return settings.liveFeedCamera === 'webcam' ? 'webcam' : 'virtual'
+  const value = settings.liveFeedCamera
+  return CAMERA_SOURCES.includes(value) ? value : 'virtual'
 }
 
 export function enrollmentCameraOf(settings) {
-  return settings.enrollmentCamera === 'virtual' ? 'virtual' : 'webcam'
+  const value = settings.enrollmentCamera
+  return CAMERA_SOURCES.includes(value) ? value : 'webcam'
+}
+
+export function cameraSourceLabel(source) {
+  return {
+    webcam: 'Browser webcam',
+    virtual: 'Local backend feed',
+    obs: 'OBS Studio',
+    rtsp: 'Wired camera (RTSP)',
+  }[source] ?? 'Camera'
 }

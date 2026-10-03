@@ -30,19 +30,47 @@ const MOCK_ACCOUNTS = [
   { id: 10, username: 'a.santos', full_name: 'Andres Santos', email: 'andres.santos@smartcctv.edu', role: 'admin', is_active: true, year_levels: ['3rd Year'], sections: SECTION_LETTERS, last_login_at: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 40).toISOString() },
 ]
 
-const EMPTY_FORM = { username: '', password: '', full_name: '', email: '', role: 'teacher', year_levels: [], sections: [] }
+const EMPTY_FORM = {
+  username: '',
+  password: 'password123',
+  full_name: '',
+  email: '',
+  role: 'teacher',
+  year_levels: [],
+  sections: [],
+}
 
 const inputCls = 'w-full px-3 py-2 text-sm bg-[#242836] border border-[#2d3148] rounded-lg text-slate-200 placeholder-slate-600 focus:outline-none focus:border-cyan-500/50'
 const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5'
 
 const yearShort = (year) => year.replace(' Year', '')
 
-function ScopePills({ title, hint, options, selected, onToggle }) {
+function ScopePills({ title, hint, options, selected, onToggle, onSelectAll, onClearAll }) {
   return (
     <div>
       <div className="flex items-baseline justify-between gap-2 mb-1.5">
         <span className={labelCls + ' mb-0'}>{title}</span>
-        {hint && <span className="text-[10px] text-slate-600">{hint}</span>}
+        <div className="flex items-center gap-2">
+          {onSelectAll && (
+            <button
+              type="button"
+              onClick={onSelectAll}
+              className="text-[10px] text-cyan-400 hover:text-cyan-300 transition-colors"
+            >
+              All
+            </button>
+          )}
+          {onClearAll && (
+            <button
+              type="button"
+              onClick={onClearAll}
+              className="text-[10px] text-slate-500 hover:text-slate-400 transition-colors"
+            >
+              Clear
+            </button>
+          )}
+          {hint && <span className="text-[10px] text-slate-600">{hint}</span>}
+        </div>
       </div>
       <div className="flex flex-wrap gap-1.5">
         {options.map((opt) => {
@@ -146,40 +174,74 @@ export default function TeacherManagement() {
 
   const setField = (k, v) => setForm((f) => ({ ...f, [k]: v }))
 
+  const handleFullNameChange = (name) => {
+    setForm((f) => {
+      const next = { ...f, full_name: name }
+      if (!editing && (!f.username || f._autoUsername)) {
+        const parts = name.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim().split(/\s+/)
+        if (parts.length >= 2 && parts[0] && parts[1]) {
+          next.username = `${parts[0][0]}.${parts.slice(1).join('')}`
+        } else if (parts[0]) {
+          next.username = parts[0]
+        }
+        if (next.username) {
+          next.email = `${next.username}@smartcctv.edu`
+        }
+        next._autoUsername = true
+      }
+      return next
+    })
+  }
+
   const toggleIn = (k, v) => setForm((f) => ({ ...f, [k]: f[k].includes(v) ? f[k].filter((x) => x !== v) : [...f[k], v] }))
 
   const scopePreview = useMemo(() => assignableSections(form.year_levels, form.sections), [form.year_levels, form.sections])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!form.full_name.trim()) return toast.error('Full name is required')
-    if (!editing && !form.username.trim()) return toast.error('Username is required')
-    if (!editing && !form.password.trim()) return toast.error('Password is required for a new account')
+    const name = form.full_name.trim()
+    if (!name) return toast.error('Full name is required')
+
+    let username = form.username.trim().toLowerCase().replace(/\s+/g, '')
+    if (!editing) {
+      if (!username) {
+        const parts = name.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim().split(/\s+/)
+        username = parts.length >= 2 ? `${parts[0][0]}.${parts.slice(1).join('')}` : (parts[0] || 'teacher')
+      }
+      if (username.length < 3) {
+        return toast.error('Username must be at least 3 characters long')
+      }
+    }
+
+    const password = (form.password || 'password123').trim()
+    if (!editing && password.length < 4) {
+      return toast.error('Password must be at least 4 characters long')
+    }
 
     setSaving(true)
     try {
       if (editing) {
         const payload = {
-          full_name: form.full_name.trim(),
+          full_name: name,
           email: form.email.trim() || null,
           role: form.role,
           year_levels: form.year_levels,
           sections: form.sections,
         }
-        if (form.password.trim()) payload.password = form.password.trim()
+        if (form.password && form.password.trim()) payload.password = form.password.trim()
         await updateTeacherAccount(editing.id, payload)
         toast.success('Account updated')
       } else {
         await createTeacherAccount({
-          username: form.username.trim().toLowerCase(),
-          password: form.password,
-          full_name: form.full_name.trim(),
-          email: form.email.trim() || null,
+          username,
+          password,
+          full_name: name,
+          email: form.email.trim() || `${username}@smartcctv.edu`,
           role: form.role,
           year_levels: form.year_levels,
           sections: form.sections,
         })
-        toast.success('Account created')
+        toast.success(`Account @${username} created with password: ${password}`)
       }
       setFormOpen(false)
       await load()
@@ -392,18 +454,29 @@ export default function TeacherManagement() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className={labelCls}>Full name</label>
-            <input type="text" value={form.full_name} onChange={(e) => setField('full_name', e.target.value)} placeholder="e.g. Maria Ramos" className={inputCls} />
+            <input
+              type="text"
+              value={form.full_name}
+              onChange={(e) => handleFullNameChange(e.target.value)}
+              placeholder="e.g. Maria Ramos"
+              className={inputCls}
+              required
+            />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className={labelCls}>Username</label>
+              <div className="flex items-baseline justify-between">
+                <label className={labelCls}>Username</label>
+                <span className="text-[10px] text-slate-500">Min 3 chars</span>
+              </div>
               <input
                 type="text"
                 value={form.username}
-                onChange={(e) => setField('username', e.target.value)}
+                onChange={(e) => setField('username', e.target.value.toLowerCase().replace(/\s+/g, ''))}
                 disabled={!!editing}
                 placeholder="e.g. m.ramos"
                 className={`${inputCls} ${editing ? 'opacity-60 cursor-not-allowed' : ''}`}
+                required
               />
             </div>
             <div>
@@ -420,19 +493,37 @@ export default function TeacherManagement() {
               <input type="email" value={form.email} onChange={(e) => setField('email', e.target.value)} placeholder="name@smartcctv.edu" className={inputCls} />
             </div>
             <div>
-              <label className={labelCls}>Password</label>
+              <div className="flex items-baseline justify-between">
+                <label className={labelCls}>Password</label>
+                <span className="text-[10px] text-cyan-400">Default: password123</span>
+              </div>
               <input
-                type="password"
+                type="text"
                 value={form.password}
                 onChange={(e) => setField('password', e.target.value)}
-                placeholder={editing ? 'Leave blank to keep current' : 'Set an initial password'}
+                placeholder={editing ? 'Leave blank to keep current' : 'password123'}
                 className={inputCls}
               />
             </div>
           </div>
           <div className="space-y-3 pt-1">
-            <ScopePills title="Year levels handled" options={YEAR_LEVELS} selected={form.year_levels} onToggle={(v) => toggleIn('year_levels', v)} />
-            <ScopePills title="Sections handled" hint="5 sections per year" options={SECTION_LETTERS} selected={form.sections} onToggle={(v) => toggleIn('sections', v)} />
+            <ScopePills
+              title="Year levels handled"
+              options={YEAR_LEVELS}
+              selected={form.year_levels}
+              onToggle={(v) => toggleIn('year_levels', v)}
+              onSelectAll={() => setField('year_levels', [...YEAR_LEVELS])}
+              onClearAll={() => setField('year_levels', [])}
+            />
+            <ScopePills
+              title="Sections handled"
+              hint="5 sections per year"
+              options={SECTION_LETTERS}
+              selected={form.sections}
+              onToggle={(v) => toggleIn('sections', v)}
+              onSelectAll={() => setField('sections', [...SECTION_LETTERS])}
+              onClearAll={() => setField('sections', [])}
+            />
             <p className="text-[11px] leading-relaxed text-slate-500">
               {scopePreview.length === 0 ? (
                 <>This account can access <span className="text-slate-300">every section</span> — leave both groups empty for unrestricted access, or pick at least one year level and one section to limit it.</>

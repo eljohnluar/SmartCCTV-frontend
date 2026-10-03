@@ -34,7 +34,7 @@ export default function AIStatusIndicator() {
       <div>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-white">System health</h2>
-        <button onClick={testVoice} disabled={testingVoice} className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-300 transition-colors hover:bg-emerald-400/20 disabled:opacity-50">
+        <button type="button" onClick={testVoice} disabled={testingVoice} className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-300 transition-colors hover:bg-emerald-400/20 disabled:opacity-50">
           <Volume2 size={11} /> {testingVoice ? 'Testing…' : 'Test voice'}
         </button>
         </div>

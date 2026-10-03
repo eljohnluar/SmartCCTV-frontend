@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import { enrollFace, getGestureAttendanceSettings } from '../../services/api'
 import { usePasswordConfirm } from '../../hooks/usePasswordConfirm'
-import { enrollmentCameraOf, readStoredSettings } from '../../utils/settings'
+import { enrollmentCameraOf, readStoredSettings, cameraSourceLabel } from '../../utils/settings'
 import Modal from '../common/Modal'
 
 const virtualCameraStream = '/api/camera/stream'
@@ -31,6 +31,8 @@ export default function FaceEnrollment({ open, onClose, student }) {
   const activeStep = CAPTURE_STEPS.find((step) => !captures[step.id])
   const captureCount = Object.keys(captures).length
   const isComplete = captureCount === CAPTURE_STEPS.length
+  const isBackendStream = cameraSource !== 'webcam'
+  const sourceLabel = cameraSourceLabel(cameraSource)
 
   useEffect(() => {
     if (open) {
@@ -51,7 +53,7 @@ export default function FaceEnrollment({ open, onClose, student }) {
 
   const startCamera = useCallback(async () => {
     setSourceError('')
-    if (cameraSource === 'virtual') {
+    if (isBackendStream) {
       setVirtualStreamKey((key) => key + 1)
       setStreaming(true)
       return
@@ -65,16 +67,16 @@ export default function FaceEnrollment({ open, onClose, student }) {
       setSourceError('Browser webcam access was denied or is unavailable.')
       toast.error('Camera access denied')
     }
-  }, [cameraSource])
+  }, [cameraSource, isBackendStream])
 
   const capture = () => {
     if (!activeStep) return
     const canvas = canvasRef.current
-    const source = cameraSource === 'virtual' ? virtualImageRef.current : videoRef.current
+    const source = isBackendStream ? virtualImageRef.current : videoRef.current
     if (!canvas || !source) return
 
-    const width = cameraSource === 'virtual' ? source.naturalWidth : source.videoWidth
-    const height = cameraSource === 'virtual' ? source.naturalHeight : source.videoHeight
+    const width = isBackendStream ? source.naturalWidth : source.videoWidth
+    const height = isBackendStream ? source.naturalHeight : source.videoHeight
     if (!width || !height) {
       toast.error('Wait for the camera image to load before capturing.')
       return
@@ -130,15 +132,13 @@ export default function FaceEnrollment({ open, onClose, student }) {
     onClose()
   }
 
-  const sourceLabel = cameraSource === 'virtual' ? 'OBS Virtual Camera' : 'Browser webcam'
-
   return (
     <>
     <Modal open={open} onClose={handleClose} title={`Four-angle face enrollment — ${student?.full_name ?? ''}`} size="md">
       <div className="space-y-4">
         <div className="flex items-center justify-between gap-3 rounded-lg border border-[#2d3148] bg-[#172235] px-3 py-2 text-xs text-slate-300">
           <span className="flex items-center gap-2">
-            {cameraSource === 'virtual' ? <Video size={14} className="text-emerald-300" /> : <Camera size={14} className="text-emerald-300" />}
+            {isBackendStream ? <Video size={14} className="text-emerald-300" /> : <Camera size={14} className="text-emerald-300" />}
             Source: <strong className="font-medium text-white">{sourceLabel}</strong>
           </span>
           <span className="font-medium text-emerald-300">{captureCount}/4 captured</span>
@@ -153,7 +153,7 @@ export default function FaceEnrollment({ open, onClose, student }) {
             <div className="relative flex aspect-video items-center justify-center overflow-hidden rounded-xl bg-[#0f1117]">
               {!streaming && <div className="px-5 text-center text-slate-600">{sourceError ? <p className="text-sm text-red-300">{sourceError}</p> : <><Camera size={32} className="mx-auto mb-2" /><p className="text-sm">Camera not started</p></>}</div>}
               <video ref={videoRef} autoPlay playsInline muted className={`h-full w-full object-cover ${cameraSource === 'webcam' && streaming ? 'block' : 'hidden'}`} />
-              <img ref={virtualImageRef} src={cameraSource === 'virtual' && streaming ? `${virtualCameraStream}?enrollment=${student?.id ?? 'face'}&refresh=${virtualStreamKey}` : undefined} alt="OBS Virtual Camera enrollment preview" onError={() => { setStreaming(false); setSourceError('OBS Virtual Camera is unavailable. Start it in OBS, then try again.') }} className={`h-full w-full object-cover ${cameraSource === 'virtual' && streaming ? 'block' : 'hidden'}`} />
+              <img ref={virtualImageRef} src={isBackendStream && streaming ? `${virtualCameraStream}?enrollment=${student?.id ?? 'face'}&refresh=${virtualStreamKey}` : undefined} alt={`${sourceLabel} enrollment preview`} onError={() => { setStreaming(false); setSourceError(`${sourceLabel} is unavailable. Start the camera feed, then try again.`) }} className={`h-full w-full object-cover ${isBackendStream && streaming ? 'block' : 'hidden'}`} />
               <canvas ref={canvasRef} className="hidden" />
             </div>
           </>
@@ -171,7 +171,7 @@ export default function FaceEnrollment({ open, onClose, student }) {
         </div>
 
         <div className="flex gap-2">
-          {!streaming && !isComplete && <button onClick={startCamera} className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-green-500/10 py-2.5 text-sm font-medium text-green-400 transition-colors hover:bg-green-500/20">{cameraSource === 'virtual' ? <Video size={16} /> : <Camera size={16} />}{cameraSource === 'virtual' ? 'Connect Virtual Camera' : 'Start Webcam'}</button>}
+          {!streaming && !isComplete && <button onClick={startCamera} className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-green-500/10 py-2.5 text-sm font-medium text-green-400 transition-colors hover:bg-green-500/20">{isBackendStream ? <Video size={16} /> : <Camera size={16} />}{isBackendStream ? 'Connect camera feed' : 'Start Webcam'}</button>}
           {streaming && activeStep && <button onClick={capture} className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-green-500 py-2.5 text-sm font-medium text-black transition-colors hover:bg-green-400"><Camera size={16} />Capture {activeStep.label}</button>}
           {isComplete && <button onClick={enroll} disabled={enrolling} className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-green-500 py-2.5 text-sm font-medium text-black transition-colors hover:bg-green-400 disabled:opacity-50"><Check size={16} />{enrolling ? 'Enrolling...' : 'Enroll 4 Face Angles'}</button>}
           <button onClick={handleClose} className="rounded-lg bg-[#242836] p-2.5 text-slate-400 transition-colors hover:bg-white/5 hover:text-red-400" aria-label="Close enrollment"><X size={16} /></button>

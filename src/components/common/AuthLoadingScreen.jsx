@@ -36,14 +36,14 @@ export default function AuthLoadingScreen({ type = 'login', message }) {
   const isLogout = type === 'logout'
 
   const title = isLogout
-    ? 'TERMINATING OPERATIONAL SESSION'
+    ? 'Signing you out'
     : type === 'register'
-    ? 'AUTHORIZING NEW OPERATOR'
-    : 'AUTHENTICATING NEURAL INTERFACE'
+    ? 'Creating your account'
+    : 'Signing you in'
 
   const subtitle = message || (isLogout
-    ? 'Disconnecting RTSP stream, purging session cache, and returning to gateway...'
-    : 'Establishing encrypted channel, synchronizing FaceNet vectors, and loading camera feed...')
+    ? 'You will be back at the sign-in page in a moment...'
+    : 'Setting up your workspace and loading the camera feed...')
 
   return (
     <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden bg-[#040711] text-white font-sans select-none">
@@ -77,15 +77,15 @@ export default function AuthLoadingScreen({ type = 'login', message }) {
         <span className={`absolute bottom-0 right-0 h-8 w-8 border-b-2 border-r-2 ${isLogout ? 'border-red-500 shadow-[0_0_12px_#ef4444]' : 'border-cyan-400 shadow-[0_0_12px_#00f0ff]'}`} />
       </div>
 
-      {/* Top telemetry badge */}
+      {/* Top badge */}
       <div className="relative z-10 mb-8 flex items-center gap-2 font-mono text-[11px] text-slate-400">
         <span className={`h-2 w-2 animate-ping rounded-full ${isLogout ? 'bg-red-400' : 'bg-cyan-400'}`} />
         <span className="uppercase tracking-widest text-slate-300">
-          {isLogout ? 'SESSION DISENGAGEMENT' : 'SYSTEM AUTHORIZATION GATEWAY'}
+          {isLogout ? 'Goodbye for now' : 'SmartCCTV'}
         </span>
         <span className="text-slate-600">|</span>
         <span className={isLogout ? 'text-red-400 font-bold' : 'text-cyan-400 font-bold'}>
-          {countdown.toFixed(1)}s REMAINING
+          {countdown.toFixed(1)}s
         </span>
       </div>
 
@@ -130,7 +130,7 @@ export default function AuthLoadingScreen({ type = 'login', message }) {
 
         {/* ── Status Header & Message ────────────────────────────────────────── */}
         <div className="text-center max-w-lg px-4">
-          <h2 className="font-mono text-base font-black tracking-widest text-white sm:text-lg">
+          <h2 className="text-lg font-bold tracking-tight text-white sm:text-xl">
             {title}
           </h2>
           <p className="mt-2 text-xs leading-relaxed text-slate-400">
@@ -138,11 +138,11 @@ export default function AuthLoadingScreen({ type = 'login', message }) {
           </p>
         </div>
 
-        {/* ── High-Tech 3-Second Progress Bar ─────────────────────────────────── */}
+        {/* ── 3-Second Progress Bar ─────────────────────────────────── */}
         <div className="mt-8 w-72 sm:w-80">
           <div className="mb-2 flex items-center justify-between font-mono text-[11px]">
             <span className="text-slate-500 tracking-wider">
-              {isLogout ? 'FLUSHING DATA' : 'LOADING MATRICES'}
+              {isLogout ? 'Almost done' : 'Please wait'}
             </span>
             <span className={`font-bold ${isLogout ? 'text-red-400' : 'text-cyan-400'}`}>
               {progress}%
@@ -163,28 +163,28 @@ export default function AuthLoadingScreen({ type = 'login', message }) {
           {/* Stepped progress indicators */}
           <div className="mt-3 flex justify-between font-mono text-[9px] text-slate-600">
             <span className={progress >= 25 ? (isLogout ? 'text-red-400' : 'text-cyan-400') : ''}>
-              [01 // HANDSHAKE]
+              Connecting
             </span>
             <span className={progress >= 50 ? (isLogout ? 'text-red-400' : 'text-cyan-400') : ''}>
-              [02 // ENCRYPTION]
+              Securing
             </span>
             <span className={progress >= 75 ? (isLogout ? 'text-red-400' : 'text-cyan-400') : ''}>
-              [03 // PIPELINE]
+              Loading
             </span>
             <span className={progress >= 100 ? (isLogout ? 'text-red-400' : 'text-cyan-400') : ''}>
-              [04 // READY]
+              Ready
             </span>
           </div>
         </div>
       </div>
 
-      {/* Bottom technical footer */}
+      {/* Bottom footer */}
       <div className="absolute bottom-6 z-10 flex items-center gap-4 font-mono text-[10px] text-slate-600">
-        <span>SMART CCTV // SECURITY CORE</span>
+        <span>SmartCCTV · Secure connection</span>
         <span>&bull;</span>
-        <span>TLS 1.3 ENCRYPTED</span>
+        <span>TLS 1.3 encrypted</span>
         <span>&bull;</span>
-        <span>TRANSITION: 3.0s</span>
+        <span>3.0s</span>
       </div>
     </div>
   )

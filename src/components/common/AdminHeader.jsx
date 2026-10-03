@@ -4,6 +4,7 @@ import { useApp } from '../../context/AppContext'
 import { useAuth } from '../../context/AuthContext'
 import { todayLabel } from '../../utils/helpers'
 import { SYSTEM_STATUS } from '../../utils/constants'
+import ThemeToggle from './ThemeToggle'
 
 export default function AdminHeader({ title }) {
   const { systemStatus, refreshStatus } = useApp()
@@ -48,6 +49,8 @@ export default function AdminHeader({ title }) {
           <span className={`w-2 h-2 rounded-full ${statusDot}`} />
           <span className={`text-xs font-medium capitalize ${statusColor}`}>{systemStatus}</span>
         </div>
+
+        <ThemeToggle />
 
         <button
           onClick={refreshStatus}

@@ -1,4 +1,4 @@
-import { Download } from 'lucide-react'
+import { Download, Printer } from 'lucide-react'
 import { useState } from 'react'
 import { formatDate, formatTime } from '../../utils/helpers'
 import Badge from '../common/Badge'
@@ -6,20 +6,27 @@ import LoadingSpinner from '../common/LoadingSpinner'
 
 const PAGE_SIZE = 15
 
-export default function ReportTable({ records, loading, onExportCSV }) {
+export default function ReportTable({ records, loading, onExportCSV, onExportPDF }) {
   const [page, setPage] = useState(0)
   const total = records.length
   const pages = Math.ceil(total / PAGE_SIZE)
-  const slice = records.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
+  const safePage = Math.min(page, Math.max(0, pages - 1))
+  const slice = records.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE)
 
   return (
     <div className="bg-[#1a1d27] border border-[#2d3148] rounded-xl overflow-hidden">
       <div className="flex items-center justify-between px-5 py-4 border-b border-[#2d3148]">
         <h2 className="text-sm font-semibold text-white">Detailed Records</h2>
-        <button onClick={onExportCSV}
-          className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-300 bg-[#242836] border border-[#2d3148] rounded-lg hover:border-green-500/30 hover:text-green-400 transition-colors">
-          <Download size={13} /> Export CSV
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={onExportPDF}
+            className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-300 bg-[#242836] border border-[#2d3148] rounded-lg hover:border-green-500/30 hover:text-green-400 transition-colors">
+            <Printer size={13} /> Export PDF
+          </button>
+          <button onClick={onExportCSV}
+            className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-300 bg-[#242836] border border-[#2d3148] rounded-lg hover:border-green-500/30 hover:text-green-400 transition-colors">
+            <Download size={13} /> Export CSV
+          </button>
+        </div>
       </div>
       {loading ? <div className="py-16"><LoadingSpinner /></div> : (
         <>
@@ -52,10 +59,10 @@ export default function ReportTable({ records, loading, onExportCSV }) {
             <div className="flex items-center justify-between px-5 py-3 border-t border-[#2d3148]">
               <span className="text-xs text-slate-500">{total} records</span>
               <div className="flex gap-2">
-                <button disabled={page === 0} onClick={() => setPage(p => p - 1)}
+                <button disabled={safePage === 0} onClick={() => setPage(p => p - 1)}
                   className="px-3 py-1 text-xs rounded-lg bg-[#242836] text-slate-400 hover:text-white disabled:opacity-30 transition-colors">Prev</button>
-                <span className="px-3 py-1 text-xs text-slate-400">{page + 1} / {pages}</span>
-                <button disabled={page === pages - 1} onClick={() => setPage(p => p + 1)}
+                <span className="px-3 py-1 text-xs text-slate-400">{safePage + 1} / {pages}</span>
+                <button disabled={safePage === pages - 1} onClick={() => setPage(p => p + 1)}
                   className="px-3 py-1 text-xs rounded-lg bg-[#242836] text-slate-400 hover:text-white disabled:opacity-30 transition-colors">Next</button>
               </div>
             </div>

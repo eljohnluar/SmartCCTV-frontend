@@ -1,4 +1,4 @@
-import { CheckCircle2, Clock3, Shield } from 'lucide-react'
+import { CheckCircle2, Clock3, Shield, X } from 'lucide-react'
 
 function formatTime(timestamp) {
   return new Intl.DateTimeFormat(undefined, {
@@ -8,7 +8,7 @@ function formatTime(timestamp) {
   }).format(new Date(timestamp || Date.now()))
 }
 
-export default function AttendanceRecognitionOverlay({ recognition }) {
+export default function AttendanceRecognitionOverlay({ recognition, onClose }) {
   if (!recognition) return null
 
   const initial = (recognition.student_name || '?').slice(0, 1).toUpperCase()
@@ -18,7 +18,7 @@ export default function AttendanceRecognitionOverlay({ recognition }) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto px-4 py-6 backdrop-blur-md"
+      className="fixed inset-0 z-[10000] flex items-center justify-center overflow-y-auto px-4 py-6 backdrop-blur-md animate-in fade-in duration-200"
       style={{ background: 'rgba(0, 8, 20, 0.94)' }}
       role="status"
       aria-live="assertive"
@@ -33,7 +33,7 @@ export default function AttendanceRecognitionOverlay({ recognition }) {
       />
 
       {/* Outer Card Container with Adaptive Cyberpunk Corner Brackets */}
-      <div className="relative z-10 my-auto flex w-full max-w-[420px] flex-col items-center sm:max-w-[480px]">
+      <div className="relative z-10 my-auto flex w-full max-w-[440px] flex-col items-center sm:max-w-[480px] md:max-w-[500px]">
         {/* Pulsing Corner Brackets */}
         <div className="pointer-events-none absolute -inset-3 sm:-inset-4">
           {/* Top-left */}
@@ -60,7 +60,7 @@ export default function AttendanceRecognitionOverlay({ recognition }) {
 
         {/* Card Body */}
         <div
-          className="relative flex w-full flex-col items-center overflow-hidden rounded-2xl"
+          className="relative flex w-full flex-col items-center overflow-hidden rounded-3xl"
           style={{
             background: 'linear-gradient(160deg, #0b1a2e 0%, #071020 100%)',
             border: '1px solid rgba(34,197,94,0.35)',
@@ -70,49 +70,60 @@ export default function AttendanceRecognitionOverlay({ recognition }) {
         >
           {/* Top status bar */}
           <div
-            className="flex w-full items-center justify-between px-6 py-2.5"
+            className="flex w-full items-center justify-between px-6 py-3"
             style={{
               background: 'rgba(34,197,94,0.08)',
               borderBottom: '1px solid rgba(34,197,94,0.16)',
             }}
           >
             <div className="flex items-center gap-2">
-              <Shield size={12} className="text-emerald-400" />
-              <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-400">
+              <Shield size={14} className="text-emerald-400" />
+              <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-400 sm:text-[11px]">
                 Identity Verified
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <span
-                className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400"
-                style={{ boxShadow: '0 0 6px #22c55e' }}
-              />
-              <span className="font-mono text-[9px] font-medium tracking-wider text-emerald-400/90">
-                BIOMETRIC LIVE
-              </span>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5">
+                <span
+                  className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400"
+                  style={{ boxShadow: '0 0 6px #22c55e' }}
+                />
+                <span className="font-mono text-[9px] font-medium tracking-wider text-emerald-400/90 sm:text-[10px]">
+                  Live · 5s
+                </span>
+              </div>
+              {onClose && (
+                <button
+                  onClick={onClose}
+                  aria-label="Dismiss recognition overlay"
+                  className="rounded-lg p-1 text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
+                >
+                  <X size={15} />
+                </button>
+              )}
             </div>
           </div>
 
-          {/* Photo section with HUD rings */}
-          <div className="relative mt-8 flex items-center justify-center p-4 sm:mt-9">
+          {/* Enlarged Photo Section with Multi-layer HUD Rings */}
+          <div className="relative mt-5 flex items-center justify-center p-2 sm:mt-6">
             {/* Outer Cardinal HUD Ticks */}
-            <span className="absolute -top-1 h-2.5 w-0.5 bg-emerald-400/70" />
-            <span className="absolute -bottom-1 h-2.5 w-0.5 bg-emerald-400/70" />
-            <span className="absolute -left-1 h-0.5 w-2.5 bg-emerald-400/70" />
-            <span className="absolute -right-1 h-0.5 w-2.5 bg-emerald-400/70" />
+            <span className="absolute -top-1 h-3 w-0.5 bg-emerald-400/70" />
+            <span className="absolute -bottom-1 h-3 w-0.5 bg-emerald-400/70" />
+            <span className="absolute -left-1 h-0.5 w-3 bg-emerald-400/70" />
+            <span className="absolute -right-1 h-0.5 w-3 bg-emerald-400/70" />
 
             {/* Glowing Accent Ring */}
             <div
-              className="absolute h-[256px] w-[256px] rounded-full sm:h-[304px] sm:w-[304px]"
+              className="absolute h-[276px] w-[276px] rounded-full sm:h-[316px] sm:w-[316px] md:h-[344px] md:w-[344px]"
               style={{
                 boxShadow:
-                  '0 0 0 2px rgba(34,197,94,0.45), 0 0 35px rgba(34,197,94,0.28), 0 0 70px rgba(34,197,94,0.1)',
+                  '0 0 0 2px rgba(34,197,94,0.45), 0 0 40px rgba(34,197,94,0.3), 0 0 80px rgba(34,197,94,0.12)',
               }}
             />
 
             {/* Spinning Dashed Ring */}
             <div
-              className="absolute h-[280px] w-[280px] animate-spin rounded-full sm:h-[332px] sm:w-[332px]"
+              className="absolute h-[300px] w-[300px] animate-spin rounded-full sm:h-[344px] sm:w-[344px] md:h-[372px] md:w-[372px]"
               style={{
                 background: 'transparent',
                 border: '1.5px dashed rgba(34,197,94,0.35)',
@@ -122,24 +133,24 @@ export default function AttendanceRecognitionOverlay({ recognition }) {
 
             {/* Inner Counter-Spinning Ring */}
             <div
-              className="absolute h-[304px] w-[304px] animate-spin rounded-full sm:h-[356px] sm:w-[356px]"
+              className="absolute h-[324px] w-[324px] animate-spin rounded-full sm:h-[372px] sm:w-[372px] md:h-[400px] md:w-[400px]"
               style={{
                 background: 'transparent',
                 border: '1px solid transparent',
-                borderTopColor: 'rgba(34,197,94,0.45)',
+                borderTopColor: 'rgba(34,197,94,0.5)',
                 borderRightColor: 'rgba(34,197,94,0.15)',
-                borderBottomColor: 'rgba(34,197,94,0.3)',
+                borderBottomColor: 'rgba(34,197,94,0.35)',
                 animationDuration: '3.5s',
                 animationDirection: 'reverse',
               }}
             />
 
-            {/* Enlarged Photo / Initial Frame */}
+            {/* Big Display Photo / Biometric Initial Frame */}
             <div
-              className="relative h-60 w-60 overflow-hidden rounded-full sm:h-72 sm:w-72"
+              className="relative h-64 w-64 overflow-hidden rounded-full sm:h-72 sm:w-72 md:h-80 md:w-80"
               style={{
-                border: '2.5px solid rgba(34,197,94,0.7)',
-                boxShadow: '0 0 28px rgba(34,197,94,0.25)',
+                border: '3px solid rgba(34,197,94,0.75)',
+                boxShadow: '0 0 35px rgba(34,197,94,0.35)',
               }}
             >
               <div className="flex h-full w-full items-center justify-center bg-[#0d221b] text-7xl font-bold text-emerald-300 sm:text-8xl">
@@ -159,12 +170,12 @@ export default function AttendanceRecognitionOverlay({ recognition }) {
           </div>
 
           {/* Scan line sweeping animation across photo */}
-          <div className="relative mt-1 h-2 w-60 overflow-hidden sm:w-72">
+          <div className="relative mt-2 h-2 w-64 overflow-hidden sm:w-72 md:w-80">
             <div
-              className="absolute inset-y-0 w-16"
+              className="absolute inset-y-0 w-24"
               style={{
                 background:
-                  'linear-gradient(90deg, transparent, rgba(34,197,94,0.6), transparent)',
+                  'linear-gradient(90deg, transparent, rgba(34,197,94,0.65), transparent)',
                 animation: 'scanSlide 2s linear infinite',
               }}
             />
@@ -172,8 +183,8 @@ export default function AttendanceRecognitionOverlay({ recognition }) {
 
           <style>{`
             @keyframes scanSlide {
-              0% { left: -5rem; }
-              100% { left: 19rem; }
+              0% { left: -6rem; }
+              100% { left: 26rem; }
             }
             @keyframes glitch {
               0%, 100% { text-shadow: none; transform: translate(0,0); }
@@ -181,17 +192,21 @@ export default function AttendanceRecognitionOverlay({ recognition }) {
               40% { text-shadow: 1px 0 rgba(16,185,129,0.8); transform: translate(1px,0); }
               60% { text-shadow: none; transform: translate(0,0); }
             }
+            @keyframes countdownBar {
+              0% { width: 100%; }
+              100% { width: 0%; }
+            }
           `}</style>
 
-          {/* Details section */}
-          <div className="flex w-full flex-col items-center px-6 pb-8 pt-4 sm:px-8">
+          {/* Details Section */}
+          <div className="flex w-full flex-col items-center px-6 pb-5 pt-3 sm:px-8">
             {/* Confirmed badge */}
             <div className="mb-3 flex items-center gap-2">
               {recognition.status === 'late' ? (
                 <>
-                  <Clock3 size={15} className="text-amber-400" />
+                  <Clock3 size={16} className="text-amber-400" />
                   <span
-                    className="font-mono text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400"
+                    className="font-mono text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400 sm:text-xs"
                     style={{ textShadow: '0 0 10px rgba(245,158,11,0.65)' }}
                   >
                     Attendance Marked · Late
@@ -199,9 +214,9 @@ export default function AttendanceRecognitionOverlay({ recognition }) {
                 </>
               ) : (
                 <>
-                  <CheckCircle2 size={15} className="text-emerald-400" />
+                  <CheckCircle2 size={16} className="text-emerald-400" />
                   <span
-                    className="font-mono text-[11px] font-semibold uppercase tracking-[0.25em] text-emerald-400"
+                    className="font-mono text-[11px] font-semibold uppercase tracking-[0.25em] text-emerald-400 sm:text-xs"
                     style={{ textShadow: '0 0 10px rgba(34,197,94,0.65)' }}
                   >
                     Attendance Marked · Present
@@ -212,7 +227,7 @@ export default function AttendanceRecognitionOverlay({ recognition }) {
 
             {/* Name */}
             <h2
-              className="text-center text-2xl font-bold tracking-wide text-white sm:text-3xl"
+              className="text-center text-xl font-black tracking-wide text-white sm:text-2xl md:text-3xl"
               style={{
                 textShadow: '0 0 20px rgba(34,197,94,0.3)',
                 animation: 'glitch 4s ease-in-out infinite',
@@ -223,21 +238,21 @@ export default function AttendanceRecognitionOverlay({ recognition }) {
 
             {/* Student code */}
             {recognition.student_code && (
-              <p className="mt-1 font-mono text-xs tracking-[0.18em] text-emerald-500/85">
+              <p className="mt-1 font-mono text-xs tracking-[0.2em] text-emerald-400/90 sm:text-sm">
                 ID: {recognition.student_code}
               </p>
             )}
 
             {/* Section */}
             {recognition.section && (
-              <p className="mt-1 max-w-full truncate px-4 text-center text-xs tracking-wide text-slate-400">
+              <p className="mt-1 max-w-full truncate px-4 text-center text-xs tracking-wide text-slate-400 sm:text-sm">
                 {recognition.section}
               </p>
             )}
 
             {/* Futuristic divider */}
             <div
-              className="my-5 h-px w-full"
+              className="my-3 h-px w-full"
               style={{
                 background:
                   'linear-gradient(90deg, transparent, rgba(34,197,94,0.45), transparent)',
@@ -245,16 +260,16 @@ export default function AttendanceRecognitionOverlay({ recognition }) {
             />
 
             {/* Time + Confidence row */}
-            <div className="flex w-full items-center justify-between font-mono text-xs text-slate-400">
+            <div className="flex w-full items-center justify-between font-mono text-xs text-slate-400 sm:text-sm">
               <div className="flex items-center gap-2">
-                <Clock3 size={13} className="text-emerald-400" />
+                <Clock3 size={14} className="text-emerald-400" />
                 <span className="text-emerald-300/90">
                   {formatTime(recognition.check_in_time)}
                 </span>
               </div>
               {confidence && (
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] uppercase tracking-wider text-slate-500">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-500 sm:text-[11px]">
                     Match
                   </span>
                   <span className="font-semibold text-emerald-300">
@@ -267,7 +282,7 @@ export default function AttendanceRecognitionOverlay({ recognition }) {
             {/* Match confidence progress bar */}
             {recognition.confidence && (
               <div className="mt-3 w-full">
-                <div className="h-[3.5px] w-full overflow-hidden rounded-full bg-slate-800/80">
+                <div className="h-[4px] w-full overflow-hidden rounded-full bg-slate-800/80">
                   <div
                     className="h-full rounded-full"
                     style={{
@@ -281,9 +296,22 @@ export default function AttendanceRecognitionOverlay({ recognition }) {
               </div>
             )}
 
+            {/* 5-second countdown progress bar */}
+            <div className="mt-3 w-full">
+              <div className="h-[3px] w-full overflow-hidden rounded-full bg-slate-800/70">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400"
+                  style={{
+                    animation: 'countdownBar 5s linear forwards',
+                    boxShadow: '0 0 10px rgba(34,197,94,0.6)',
+                  }}
+                />
+              </div>
+            </div>
+
             {/* Auto-return hint */}
-            <p className="mt-5 font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
-              Returning to dashboard…
+            <p className="mt-2.5 font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
+              Returning to dashboard in 5s…
             </p>
           </div>
         </div>
