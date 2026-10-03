@@ -5,11 +5,14 @@
 
 function resolveWsUrl() {
   const configured = import.meta.env.VITE_WEBSOCKET_URL
-  if (configured) return configured
+  if (configured) {
+    // Accept https:// forms and trailing slashes: https://host/ws/ -> wss://host/ws
+    return configured.replace(/^http/, 'ws').replace(/\/+$/, '')
+  }
   const apiBase = import.meta.env.VITE_API_BASE_URL
   if (apiBase && apiBase.startsWith('http')) {
     // Derive from the API base: https://backend.up.railway.app[/api] -> wss://backend.up.railway.app/ws
-    const host = apiBase.replace(/^http/, 'ws').replace(/\/api\/?$/, '')
+    const host = apiBase.replace(/^http/, 'ws').replace(/\/api\/?$/, '').replace(/\/+$/, '')
     return `${host}/ws`
   }
   return 'ws://localhost:8000/ws'
