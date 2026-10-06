@@ -8,6 +8,7 @@ import {
   ScrollText,
   Settings,
   ShieldCheck,
+  Users,
 } from 'lucide-react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useApp } from '../../context/AppContext'
@@ -16,6 +17,7 @@ import { useAuth } from '../../context/AuthContext'
 const adminNavItems = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/admin/teachers', label: 'Teacher Management', icon: GraduationCap },
+  { to: '/admin/students', label: 'Student Management', icon: Users },
   { to: '/admin/attendance', label: 'Attendance', icon: CalendarCheck },
   { to: '/admin/audit', label: 'Audit Log', icon: ScrollText },
   { to: '/admin/settings', label: 'Settings', icon: Settings },

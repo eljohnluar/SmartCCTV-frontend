@@ -20,6 +20,7 @@ import Login from './pages/Login'
 import Credits from './pages/Credits'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import TeacherManagement from './pages/admin/TeacherManagement'
+import AdminStudents from './pages/admin/AdminStudents'
 import AdminAttendance from './pages/admin/AdminAttendance'
 import AuditLog from './pages/admin/AuditLog'
 import AdminSettings from './pages/admin/AdminSettings'
@@ -27,6 +28,7 @@ import AdminSettings from './pages/admin/AdminSettings'
 const adminTitles = {
   '/admin': 'Administrator Dashboard',
   '/admin/teachers': 'Teacher Management',
+  '/admin/students': 'Student Management',
   '/admin/attendance': 'Attendance Oversight',
   '/admin/audit': 'Audit Log',
   '/admin/settings': 'Administrator Settings',
@@ -45,6 +47,7 @@ function AdminLayout() {
           <Routes>
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/teachers" element={<TeacherManagement />} />
+            <Route path="/admin/students" element={<AdminStudents />} />
             <Route path="/admin/attendance" element={<AdminAttendance />} />
             <Route path="/admin/audit" element={<AuditLog />} />
             <Route path="/admin/settings" element={<AdminSettings />} />

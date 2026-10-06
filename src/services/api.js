@@ -59,6 +59,8 @@ export const deleteTeacherAccount = (id, password) =>
   api.delete(`/admin/teachers/${id}`, { headers: confirmHeaders(password) })
 export const getAttendanceOverview = (params) => api.get('/admin/attendance', { params })
 export const getAuditLog = (params) => api.get('/admin/audit-log', { params })
+export const clearAuditLog = (password) =>
+  api.delete('/admin/audit-log', { headers: confirmHeaders(password) })
 
 // ── Students ──────────────────────────────────────────────────────────────────
 

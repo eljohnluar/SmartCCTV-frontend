@@ -9,6 +9,7 @@ import {
   Search,
   Trash2,
   UserCog,
+  X,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import {
@@ -20,14 +21,14 @@ import {
 import { useAuth } from '../../context/AuthContext'
 import { usePasswordConfirm } from '../../hooks/usePasswordConfirm'
 import { formatDate, formatTime } from '../../utils/helpers'
-import { SECTION_LETTERS, YEAR_LEVELS, assignableSections } from '../../utils/constants'
+import { YEAR_LEVELS } from '../../utils/constants'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import Modal from '../../components/common/Modal'
 
 const MOCK_ACCOUNTS = [
-  { id: 12, username: 'j.delacruz', full_name: 'Juan Dela Cruz', email: 'juan.delacruz@smartcctv.edu', role: 'teacher', is_active: true, year_levels: ['1st Year', '2nd Year'], sections: ['A', 'B'], last_login_at: new Date(Date.now() - 1000 * 60 * 42).toISOString(), created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 9).toISOString() },
-  { id: 11, username: 'm.ramos', full_name: 'Maria Ramos', email: 'maria.ramos@smartcctv.edu', role: 'teacher', is_active: true, year_levels: [], sections: [], last_login_at: null, created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString() },
-  { id: 10, username: 'a.santos', full_name: 'Andres Santos', email: 'andres.santos@smartcctv.edu', role: 'admin', is_active: true, year_levels: ['3rd Year'], sections: SECTION_LETTERS, last_login_at: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 40).toISOString() },
+  { id: 12, username: 'j.delacruz', full_name: 'Juan Dela Cruz', email: 'juan.delacruz@smartcctv.edu', role: 'teacher', is_active: true, year_levels: ['1st Year', '2nd Year'], sections: 'A', last_login_at: new Date(Date.now() - 1000 * 60 * 42).toISOString(), created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 9).toISOString() },
+  { id: 11, username: 'm.ramos', full_name: 'Maria Ramos', email: 'maria.ramos@smartcctv.edu', role: 'teacher', is_active: true, year_levels: [], sections: null, last_login_at: null, created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString() },
+  { id: 10, username: 'a.santos', full_name: 'Andres Santos', email: 'andres.santos@smartcctv.edu', role: 'admin', is_active: true, year_levels: ['3rd Year'], sections: 'B', last_login_at: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 40).toISOString() },
 ]
 
 const EMPTY_FORM = {
@@ -37,7 +38,17 @@ const EMPTY_FORM = {
   email: '',
   role: 'teacher',
   year_levels: [],
-  sections: [],
+  sections: [''],
+}
+
+// Accepts ['A','B'], 'A, B' or the legacy TEXT value '["A","B"]' and always
+// returns one non-empty input row at minimum.
+const toSectionRows = (value) => {
+  const list = Array.isArray(value)
+    ? value
+    : value ? String(value).replace(/[\[\]"]/g, '').split(',') : []
+  const rows = list.map((s) => String(s).trim()).filter(Boolean)
+  return rows.length ? rows : ['']
 }
 
 const inputCls = 'w-full px-3 py-2 text-sm bg-[#242836] border border-[#2d3148] rounded-lg text-slate-200 placeholder-slate-600 focus:outline-none focus:border-cyan-500/50'
@@ -45,31 +56,22 @@ const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5'
 
 const yearShort = (year) => year.replace(' Year', '')
 
-function ScopePills({ title, hint, options, selected, onToggle, onSelectAll, onClearAll }) {
+function ScopePills({ title, options, selected, onToggle, onSelectAll, onClearAll }) {
   return (
     <div>
       <div className="flex items-baseline justify-between gap-2 mb-1.5">
         <span className={labelCls + ' mb-0'}>{title}</span>
         <div className="flex items-center gap-2">
           {onSelectAll && (
-            <button
-              type="button"
-              onClick={onSelectAll}
-              className="text-[10px] text-cyan-400 hover:text-cyan-300 transition-colors"
-            >
+            <button type="button" onClick={onSelectAll} className="text-[10px] text-cyan-400 hover:text-cyan-300 transition-colors">
               All
             </button>
           )}
           {onClearAll && (
-            <button
-              type="button"
-              onClick={onClearAll}
-              className="text-[10px] text-slate-500 hover:text-slate-400 transition-colors"
-            >
+            <button type="button" onClick={onClearAll} className="text-[10px] text-slate-500 hover:text-slate-400 transition-colors">
               Clear
             </button>
           )}
-          {hint && <span className="text-[10px] text-slate-600">{hint}</span>}
         </div>
       </div>
       <div className="flex flex-wrap gap-1.5">
@@ -122,7 +124,6 @@ export default function TeacherManagement() {
       setAccounts(res?.accounts ?? [])
       setOffline(false)
     } catch (err) {
-      // Fall back to mock so the console still renders with the backend down.
       const q = search.trim().toLowerCase()
       setAccounts(MOCK_ACCOUNTS.filter((a) =>
         (roleFilter === 'all' || a.role === roleFilter) &&
@@ -167,12 +168,22 @@ export default function TeacherManagement() {
       email: acct.email || '',
       role: acct.role,
       year_levels: acct.year_levels ?? [],
-      sections: acct.sections ?? [],
+      sections: toSectionRows(acct.sections),
     })
     setFormOpen(true)
   }
 
   const setField = (k, v) => setForm((f) => ({ ...f, [k]: v }))
+
+  const setSectionRow = (index, value) => setForm((f) => ({
+    ...f,
+    sections: f.sections.map((row, i) => (i === index ? value : row)),
+  }))
+  const addSectionRow = () => setForm((f) => ({ ...f, sections: [...f.sections, ''] }))
+  const removeSectionRow = (index) => setForm((f) => {
+    const sections = f.sections.filter((_, i) => i !== index)
+    return { ...f, sections: sections.length ? sections : [''] }
+  })
 
   const handleFullNameChange = (name) => {
     setForm((f) => {
@@ -193,9 +204,10 @@ export default function TeacherManagement() {
     })
   }
 
-  const toggleIn = (k, v) => setForm((f) => ({ ...f, [k]: f[k].includes(v) ? f[k].filter((x) => x !== v) : [...f[k], v] }))
-
-  const scopePreview = useMemo(() => assignableSections(form.year_levels, form.sections), [form.year_levels, form.sections])
+  const toggleIn = (k, v) => setForm((f) => ({
+    ...f,
+    [k]: f[k].includes(v) ? f[k].filter((x) => x !== v) : [...f[k], v],
+  }))
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -218,6 +230,8 @@ export default function TeacherManagement() {
       return toast.error('Password must be at least 4 characters long')
     }
 
+    const sections = [...new Set(form.sections.map((s) => s.trim()).filter(Boolean))]
+
     setSaving(true)
     try {
       if (editing) {
@@ -226,7 +240,7 @@ export default function TeacherManagement() {
           email: form.email.trim() || null,
           role: form.role,
           year_levels: form.year_levels,
-          sections: form.sections,
+          sections,
         }
         if (form.password && form.password.trim()) payload.password = form.password.trim()
         await updateTeacherAccount(editing.id, payload)
@@ -239,7 +253,7 @@ export default function TeacherManagement() {
           email: form.email.trim() || `${username}@smartcctv.edu`,
           role: form.role,
           year_levels: form.year_levels,
-          sections: form.sections,
+          sections,
         })
         toast.success(`Account @${username} created with password: ${password}`)
       }
@@ -355,7 +369,8 @@ export default function TeacherManagement() {
                   <th className="px-4 py-3 text-[11px] uppercase tracking-wide text-slate-500 font-medium">Username</th>
                   <th className="px-4 py-3 text-[11px] uppercase tracking-wide text-slate-500 font-medium">Email</th>
                   <th className="px-4 py-3 text-[11px] uppercase tracking-wide text-slate-500 font-medium">Role</th>
-                  <th className="px-4 py-3 text-[11px] uppercase tracking-wide text-slate-500 font-medium">Scope</th>
+                  <th className="px-4 py-3 text-[11px] uppercase tracking-wide text-slate-500 font-medium">Year Levels</th>
+                  <th className="px-4 py-3 text-[11px] uppercase tracking-wide text-slate-500 font-medium">Sections</th>
                   <th className="px-4 py-3 text-[11px] uppercase tracking-wide text-slate-500 font-medium">Status</th>
                   <th className="px-4 py-3 text-[11px] uppercase tracking-wide text-slate-500 font-medium">Last login</th>
                   <th className="px-4 py-3 text-[11px] uppercase tracking-wide text-slate-500 font-medium">Created</th>
@@ -368,11 +383,9 @@ export default function TeacherManagement() {
                   const isLastAdmin = acct.role === 'admin' && acct.is_active && adminCount <= 1
                   const disableDelete = isSelf || isLastAdmin
                   const yearLevels = acct.year_levels ?? []
-                  const letters = acct.sections ?? []
-                  const acctScope = assignableSections(yearLevels, letters)
-                  const scopeTitle = acctScope.length
-                    ? `Handles ${acctScope.length} ${acctScope.length === 1 ? 'class' : 'classes'}: ${acctScope.join(', ')}`
-                    : acct.role === 'admin' ? 'Access to every section' : 'No sections assigned yet'
+                  const sectionList = Array.isArray(acct.sections)
+                    ? acct.sections
+                    : acct.sections ? [acct.sections] : []
                   return (
                     <tr key={acct.id} className="hover:bg-white/[0.01] transition-colors">
                       <td className="px-6 py-4 text-white font-medium">{acct.full_name}</td>
@@ -388,19 +401,25 @@ export default function TeacherManagement() {
                         </span>
                       </td>
                       <td className="px-4 py-4">
-                        {acctScope.length === 0 ? (
-                          <span className="text-[11px] text-slate-600 whitespace-nowrap" title={scopeTitle}>
-                            {acct.role === 'admin' ? 'All sections' : 'None yet'}
+                        {yearLevels.length === 0 ? (
+                          <span className="text-[11px] text-slate-600">
+                            {acct.role === 'admin' ? 'All' : 'None'}
                           </span>
                         ) : (
-                          <div className="flex items-center gap-1 max-w-[190px]" title={scopeTitle}>
-                            <span className="min-w-0 truncate text-[10px] px-1.5 py-0.5 rounded bg-cyan-400/10 text-cyan-300 border border-cyan-400/20 whitespace-nowrap">
-                              {yearLevels.map(yearShort).join(', ')}
-                            </span>
-                            <span className="min-w-0 truncate text-[10px] px-1.5 py-0.5 rounded bg-slate-500/10 text-slate-300 border border-slate-500/20 whitespace-nowrap">
-                              {letters.join(', ')}
-                            </span>
-                          </div>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-400/10 text-cyan-300 border border-cyan-400/20 whitespace-nowrap">
+                            {yearLevels.map(yearShort).join(', ')}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-4">
+                        {sectionList.length > 0 ? (
+                          <span className="text-[10px] px-2 py-0.5 rounded font-semibold border bg-slate-500/10 text-slate-300 border-slate-500/20">
+                            {sectionList.join(', ')}
+                          </span>
+                        ) : (
+                          <span className="text-[11px] text-slate-600">
+                            {acct.role === 'admin' ? 'All' : 'None'}
+                          </span>
                         )}
                       </td>
                       <td className="px-4 py-4">
@@ -517,30 +536,42 @@ export default function TeacherManagement() {
               onSelectAll={() => setField('year_levels', [...YEAR_LEVELS])}
               onClearAll={() => setField('year_levels', [])}
             />
-            <ScopePills
-              title="Sections handled"
-              hint="5 sections per year"
-              options={SECTION_LETTERS}
-              selected={form.sections}
-              onToggle={(v) => toggleIn('sections', v)}
-              onSelectAll={() => setField('sections', [...SECTION_LETTERS])}
-              onClearAll={() => setField('sections', [])}
-            />
-            <p className="text-[11px] leading-relaxed text-slate-500">
-              {scopePreview.length === 0 ? (
-                form.role === 'admin' ? (
-                  <>Administrators reach <span className="text-slate-300">every section</span>; these groups only scope teacher accounts.</>
-                ) : (
-                  <>A teacher with nothing selected sees <span className="text-slate-300">no sections at all</span>. Choose at least one year level and one section letter to grant access.</>
-                )
-              ) : (
-                <span title={scopePreview.join(', ')}>
-                  <span className="text-cyan-300">Handles {scopePreview.length} {scopePreview.length === 1 ? 'class' : 'classes'}</span>
-                  {': '}{scopePreview.slice(0, 3).join(', ')}
-                  {scopePreview.length > 3 && ' …'}
-                </span>
-              )}
-            </p>
+            <div>
+              <label className={labelCls}>Sections handled</label>
+              <div className="space-y-2">
+                {form.sections.map((row, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={row}
+                      onChange={(e) => setSectionRow(index, e.target.value)}
+                      placeholder={index === 0 ? 'e.g. A' : 'Another section…'}
+                      className={inputCls}
+                    />
+                    {form.sections.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeSectionRow(index)}
+                        title="Remove this section"
+                        className="shrink-0 p-2 rounded-lg text-slate-500 hover:text-red-300 hover:bg-red-500/10 transition-colors"
+                      >
+                        <X size={14} />
+                      </button>
+                    )}
+                    {index === form.sections.length - 1 && row.trim() && (
+                      <button
+                        type="button"
+                        onClick={addSectionRow}
+                        title="Add another section"
+                        className="shrink-0 p-2 rounded-lg text-cyan-400 hover:text-cyan-300 hover:bg-cyan-400/10 border border-cyan-400/20 transition-colors"
+                      >
+                        <Plus size={14} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={() => setFormOpen(false)} className="px-4 py-2 text-sm text-slate-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors">

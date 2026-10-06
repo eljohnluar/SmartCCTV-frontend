@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Search, RefreshCw, Download, ShieldAlert, Database } from 'lucide-react'
+import { Search, RefreshCw, Download, ShieldAlert, Database, RotateCcw } from 'lucide-react'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import Modal from '../../components/common/Modal'
-import { getAuditLog } from '../../services/api'
+import { usePasswordConfirm } from '../../hooks/usePasswordConfirm'
+import { clearAuditLog, getAuditLog } from '../../services/api'
 import { formatDate, formatTime, debounce } from '../../utils/helpers'
 
 const MOCK_EVENTS = [
@@ -44,6 +45,7 @@ export default function AuditLog() {
   const [serverMessage, setServerMessage] = useState('')
   const [detail, setDetail] = useState(null)
   const reloadTokenRef = useRef(0)
+  const { confirm, dialog } = usePasswordConfirm()
 
   const appliedSearch = useMemo(() => search.trim(), [search])
 
@@ -111,10 +113,25 @@ export default function AuditLog() {
     URL.revokeObjectURL(url)
   }
 
+  const handleReset = () => {
+    confirm(
+      async (password) => {
+        await clearAuditLog(password)
+        loadAudit()
+      },
+      {
+        title: 'Reset the audit log',
+        description: `This permanently deletes all ${events.length} recorded event(s). Only the reset itself stays behind, so the wipe is not a silent gap in the history.`,
+        confirmLabel: 'Clear log',
+      },
+    )
+  }
+
   const inputCls = 'px-3 py-2 text-sm bg-[#242836] border border-[#2d3148] rounded-lg text-slate-200 focus:outline-none focus:border-cyan-500/50'
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-6 pb-8">
+      {dialog}
       <div>
         <p className="text-xs text-slate-500">Review who did what across the system — logins, account changes, and registrations.</p>
       </div>
@@ -163,6 +180,15 @@ export default function AuditLog() {
             >
               <Download size={14} />
               Export CSV
+            </button>
+            <button
+              onClick={handleReset}
+              disabled={loading || offline || setupMissing || events.length === 0}
+              title="Permanently delete every recorded event"
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-300 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <RotateCcw size={14} />
+              Reset log
             </button>
           </div>
         </div>

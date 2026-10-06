@@ -52,13 +52,16 @@ export const sectionLabel = (yearLevel, letter) => `${yearLevel} - Section ${let
 export const COLLEGE_SECTIONS = YEAR_LEVELS.flatMap((year) => SECTION_LETTERS.map((letter) => sectionLabel(year, letter)))
 
 /**
- * Sections a teacher may assign students to, from their year levels and letters.
- * An empty result means the account has no section access yet, so a teacher with
- * a partial or missing assignment sees nothing until an administrator finishes it.
+ * Sections a teacher may assign students to, from their year levels and section
+ * names. Section names are free text (e.g. 'A' or '12345'), matching whatever
+ * the administrator stored in Teacher Management. An empty result means the
+ * account has no section access yet, so a teacher with a partial or missing
+ * assignment sees nothing until an administrator finishes it.
  */
 export function assignableSections(yearLevels, letters) {
   if (!yearLevels?.length || !letters?.length) return []
-  return yearLevels.flatMap((year) => letters.filter((letter) => SECTION_LETTERS.includes(letter)).map((letter) => sectionLabel(year, letter)))
+  const names = [...new Set(letters.map((l) => String(l).trim()).filter(Boolean))]
+  return yearLevels.flatMap((year) => names.map((letter) => sectionLabel(year, letter)))
 }
 
 /** Pull the year level back out of a year-scoped section label. */
