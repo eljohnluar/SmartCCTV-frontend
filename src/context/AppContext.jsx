@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useReducer } from 'react'
 import { getSystemStatus, setAttendanceRecording as setAttendanceRecordingApi } from '../services/api'
+import { useSectionScope } from '../hooks/useSectionScope'
 import { wsClient } from '../services/websocket'
 import { SYSTEM_STATUS } from '../utils/constants'
 
@@ -47,6 +48,7 @@ function reducer(state, action) {
 
 export function AppProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState)
+  const { wsSectionScope } = useSectionScope()
 
   // Poll system status from backend
   const refreshStatus = useCallback(async () => {
@@ -67,10 +69,14 @@ export function AppProvider({ children }) {
     return () => clearInterval(interval)
   }, [refreshStatus])
 
+  // The socket carries the session token so the backend only pushes check-in
+  // events for the signed-in teacher's sections. Changing account reconnects it.
+  useEffect(() => {
+    wsClient.authorize(localStorage.getItem('access_token'), wsSectionScope)
+  }, [wsSectionScope])
+
   // WebSocket real-time events
   useEffect(() => {
-    wsClient.connect()
-
     const unsubAlert = wsClient.on('alert', (data) => {
       dispatch({
         type: 'ADD_NOTIFICATION',

@@ -372,7 +372,7 @@ export default function TeacherManagement() {
                   const acctScope = assignableSections(yearLevels, letters)
                   const scopeTitle = acctScope.length
                     ? `Handles ${acctScope.length} ${acctScope.length === 1 ? 'class' : 'classes'}: ${acctScope.join(', ')}`
-                    : 'Access to every section'
+                    : acct.role === 'admin' ? 'Access to every section' : 'No sections assigned yet'
                   return (
                     <tr key={acct.id} className="hover:bg-white/[0.01] transition-colors">
                       <td className="px-6 py-4 text-white font-medium">{acct.full_name}</td>
@@ -389,7 +389,9 @@ export default function TeacherManagement() {
                       </td>
                       <td className="px-4 py-4">
                         {acctScope.length === 0 ? (
-                          <span className="text-[11px] text-slate-600 whitespace-nowrap" title={scopeTitle}>All sections</span>
+                          <span className="text-[11px] text-slate-600 whitespace-nowrap" title={scopeTitle}>
+                            {acct.role === 'admin' ? 'All sections' : 'None yet'}
+                          </span>
                         ) : (
                           <div className="flex items-center gap-1 max-w-[190px]" title={scopeTitle}>
                             <span className="min-w-0 truncate text-[10px] px-1.5 py-0.5 rounded bg-cyan-400/10 text-cyan-300 border border-cyan-400/20 whitespace-nowrap">
@@ -526,7 +528,11 @@ export default function TeacherManagement() {
             />
             <p className="text-[11px] leading-relaxed text-slate-500">
               {scopePreview.length === 0 ? (
-                <>This account can access <span className="text-slate-300">every section</span> — leave both groups empty for unrestricted access, or pick at least one year level and one section to limit it.</>
+                form.role === 'admin' ? (
+                  <>Administrators reach <span className="text-slate-300">every section</span>; these groups only scope teacher accounts.</>
+                ) : (
+                  <>A teacher with nothing selected sees <span className="text-slate-300">no sections at all</span>. Choose at least one year level and one section letter to grant access.</>
+                )
               ) : (
                 <span title={scopePreview.join(', ')}>
                   <span className="text-cyan-300">Handles {scopePreview.length} {scopePreview.length === 1 ? 'class' : 'classes'}</span>

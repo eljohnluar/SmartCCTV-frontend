@@ -89,7 +89,7 @@ function LiveStatusBadge({ status, timeoutLabel }) {
       {status === 'present' && (
         <span className="flex items-center gap-1.5 font-mono text-xs font-semibold text-emerald-400">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
-          Marking Present
+          Marking Time in
         </span>
       )}
       {status === 'late' && (
@@ -98,13 +98,13 @@ function LiveStatusBadge({ status, timeoutLabel }) {
           Marking Late
         </span>
       )}
-      {status === 'closed' && (
+      {status === 'time_out' && (
         <span
           className="flex items-center gap-1.5 font-mono text-xs font-semibold text-red-400"
-          title={`Attendance closed at ${timeoutLabel}`}
+          title={`Departures after ${timeoutLabel} are marked Time out`}
         >
-          <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
-          Check-in closed
+          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-400" />
+          Marking Time out
         </span>
       )}
     </div>
@@ -169,7 +169,7 @@ export default function CheckinTimeSchedule({ overlay = false }) {
     const lateCutoff = new Date(target.getTime() + savedGraceMinutes * 60 * 1000)
     const attendanceCutoff = new Date(target.getTime() + savedTimeoutMinutes * 60 * 1000)
 
-    if (currentTime > attendanceCutoff) return 'closed'
+    if (currentTime > attendanceCutoff) return 'time_out'
     if (currentTime > lateCutoff) return 'late'
     return 'present'
   }, [savedTime, savedGraceMinutes, savedTimeoutMinutes, currentTime])
@@ -261,7 +261,7 @@ export default function CheckinTimeSchedule({ overlay = false }) {
           {currentStatus === 'present' && (
             <span className="flex items-center gap-1.5 font-mono text-[11px] font-semibold text-emerald-300">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
-              Marking Present
+              Marking Time in
             </span>
           )}
           {currentStatus === 'late' && (
@@ -270,13 +270,13 @@ export default function CheckinTimeSchedule({ overlay = false }) {
               Marking Late
             </span>
           )}
-          {currentStatus === 'closed' && (
+          {currentStatus === 'time_out' && (
             <span
               className="flex items-center gap-1.5 font-mono text-[11px] font-semibold text-red-300"
-              title={`Attendance closed at ${format12Hour(savedTimeoutTime)}`}
+              title={`Departures after ${format12Hour(savedTimeoutTime)} are marked Time out`}
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
-              Check-in closed
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-400" />
+              Marking Time out
             </span>
           )}
         </div>
@@ -310,6 +310,11 @@ export default function CheckinTimeSchedule({ overlay = false }) {
           <LiveStatusBadge status={currentStatus} timeoutLabel={format12Hour(savedTimeoutTime)} />
         </div>
       </div>
+
+      <p className="mt-4 text-[11px] text-slate-500">
+        The camera marks Time in until {format12Hour(calculateTimeoutTimeStr(savedTime, savedGraceMinutes))}, Late
+        until {format12Hour(savedTimeoutTime)}, and Time out after that. Attendance is never refused.
+      </p>
 
       {dialog}
     </div>

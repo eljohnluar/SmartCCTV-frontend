@@ -1,8 +1,8 @@
-﻿import { statusColors } from '../../utils/helpers'
+﻿import { statusColors, statusLabel } from '../../utils/helpers'
 
 export default function Badge({ status, label }) {
   const colors = statusColors(status)
-  const text = label ?? (status ? status.charAt(0).toUpperCase() + status.slice(1) : '—')
+  const text = label ?? (status ? statusLabel(status) : '—')
   return (
     <span
       className={`

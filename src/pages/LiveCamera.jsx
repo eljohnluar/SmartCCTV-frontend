@@ -18,21 +18,33 @@ export default function LiveCamera() {
   }, [])
 
   useEffect(() => {
-    const unsubAttendance = wsClient.on('attendance', (event) => {
-      const attendanceDate = event.class_date || event.record?.class_date || new Date().toISOString().slice(0, 10)
-      const eventKey = `${event.student_id}:${attendanceDate}`
+    const showRecognition = (event, eventKey) => {
       if (displayedAttendance.current.has(eventKey)) return
       displayedAttendance.current.add(eventKey)
       clearTimeout(dismissTimer.current)
       setRecognition(event)
       dismissTimer.current = setTimeout(() => setRecognition(null), 5000)
+    }
+
+    const unsubAttendance = wsClient.on('attendance', (event) => {
+      const attendanceDate = event.class_date || event.record?.class_date || new Date().toISOString().slice(0, 10)
+      showRecognition(event, `${event.student_id}:${attendanceDate}`)
     })
+
+    const unsubTimeOut = wsClient.on('attendance_time_out', (event) => {
+      showRecognition(
+        { ...event, status: 'time_out', check_in_time: event.check_out_time },
+        `time-out:${event.student_id}:${event.class_date || ''}`,
+      )
+    })
+
     const unsubReset = wsClient.on('attendance_reset', () => {
       displayedAttendance.current.clear()
       setRecognition(null)
     })
     return () => {
       unsubAttendance()
+      unsubTimeOut()
       unsubReset()
       clearTimeout(dismissTimer.current)
     }

@@ -1,21 +1,18 @@
 import { Save } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
-import { useAuth } from '../../context/AuthContext'
-import { assignableSections, COLLEGE_SECTIONS, yearLevelOfSection } from '../../utils/constants'
+import { useSectionScope } from '../../hooks/useSectionScope'
+import { yearLevelOfSection } from '../../utils/constants'
 import Modal from '../common/Modal'
 
 const EMPTY = { student_id: '', full_name: '', section: '', grade_level: '', photo_url: '' }
 
 export default function StudentForm({ open, onClose, student, onSave }) {
   const isEdit = !!student
-  const { user } = useAuth()
+  const { allowedSections, isTeacher, needsAssignment } = useSectionScope()
   const [form, setForm] = useState(student ?? EMPTY)
   const [saving, setSaving] = useState(false)
 
-  const scopedSections = assignableSections(user?.year_levels, user?.sections)
-  const isRestricted = scopedSections.length > 0
-  const allowedSections = isRestricted ? scopedSections : COLLEGE_SECTIONS
   const isOutsideScope = !!form.section && !allowedSections.includes(form.section)
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }))
@@ -70,9 +67,13 @@ export default function StudentForm({ open, onClose, student, onSave }) {
             )}
           </select>
           <p className="mt-1.5 text-xs text-slate-500">Year level is taken from the section.</p>
-          {isRestricted && (
+          {needsAssignment ? (
+            <p className="mt-1 text-xs text-amber-300/80">
+              No sections are assigned to your account yet. Ask an administrator to assign your year levels and sections.
+            </p>
+          ) : isTeacher ? (
             <p className="mt-1 text-xs text-slate-600">Showing the sections assigned to your account.</p>
-          )}
+          ) : null}
         </div>
         {field('Photo URL (optional)', 'photo_url', 'url', 'https://...')}
         <div className="flex justify-end gap-3 pt-2">
@@ -80,7 +81,7 @@ export default function StudentForm({ open, onClose, student, onSave }) {
             className="px-4 py-2 text-sm text-slate-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors">
             Cancel
           </button>
-          <button type="submit" disabled={saving}
+          <button type="submit" disabled={saving || needsAssignment}
             className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-green-500 text-black rounded-lg hover:bg-green-400 disabled:opacity-50 transition-colors">
             <Save size={14} />{saving ? 'Saving...' : 'Save Student'}
           </button>

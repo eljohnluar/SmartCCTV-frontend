@@ -17,7 +17,7 @@ function formatTime(ts) {
 /* ─── Floating Attendance Log Glassmorphism Modal ───────────────────────── */
 function FloatingAttendanceGlassModal({ records = [], isOpen, onToggle }) {
   const markedRecords = records
-    .filter((r) => r.status === 'present' || r.status === 'late')
+    .filter((r) => r.status === 'present' || r.status === 'late' || r.status === 'time_out')
     .sort((a, b) => new Date(b.check_in_time || 0) - new Date(a.check_in_time || 0))
 
   if (!isOpen) {

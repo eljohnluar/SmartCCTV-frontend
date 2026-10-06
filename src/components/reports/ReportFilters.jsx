@@ -1,27 +1,21 @@
 import { Filter } from 'lucide-react'
 import { useMemo } from 'react'
-import { useAuth } from '../../context/AuthContext'
-import { assignableSections, COLLEGE_SECTIONS, YEAR_LEVELS, yearLevelOfSection } from '../../utils/constants'
+import { useSectionScope } from '../../hooks/useSectionScope'
+import { COLLEGE_SECTIONS, YEAR_LEVELS, yearLevelOfSection } from '../../utils/constants'
 import { toISODate } from '../../utils/helpers'
 
 export default function ReportFilters({ filters, onChange }) {
-  const { user } = useAuth()
+  const { allowedSections: availableSections, isTeacher } = useSectionScope()
   const set = (k, v) => onChange({ ...filters, [k]: v })
   const today = toISODate(new Date())
   const sevenAgo = toISODate(new Date(Date.now() - 7 * 86400000))
 
-  const scopedSections = assignableSections(user?.year_levels, user?.sections)
-  const availableSections = scopedSections.length ? scopedSections : COLLEGE_SECTIONS
-
   const yearOptions = useMemo(() => {
-    if (scopedSections.length) {
+    if (isTeacher) {
       return YEAR_LEVELS.filter((y) => availableSections.some((s) => yearLevelOfSection(s) === y))
     }
-    if (user?.year_levels?.length) {
-      return YEAR_LEVELS.filter((y) => user.year_levels.includes(y))
-    }
     return YEAR_LEVELS
-  }, [availableSections, scopedSections.length, user?.year_levels])
+  }, [availableSections, isTeacher])
 
   const sectionOptions = filters.yearLevel
     ? availableSections.filter((s) => yearLevelOfSection(s) === filters.yearLevel)

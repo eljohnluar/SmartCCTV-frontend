@@ -34,14 +34,14 @@ export default function ReportTable({ records, loading, onExportCSV, onExportPDF
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[#2d3148]">
-                  {['Date', 'Student', 'Section', 'Status', 'Check-in Time', 'Confidence'].map((h) => (
+                  {['Date', 'Student', 'Section', 'Status', 'Time in', 'Time out', 'Confidence'].map((h) => (
                     <th key={h} className="px-5 py-3 text-left text-xs font-medium text-slate-500">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#2d3148]">
                 {slice.length === 0 ? (
-                  <tr><td colSpan={6} className="px-5 py-10 text-center text-sm text-slate-600">No records for selected filters</td></tr>
+                  <tr><td colSpan={7} className="px-5 py-10 text-center text-sm text-slate-600">No records for selected filters</td></tr>
                 ) : slice.map((r) => (
                   <tr key={r.id} className="hover:bg-white/[0.02] transition-colors">
                     <td className="px-5 py-3 text-xs text-slate-400 whitespace-nowrap">{formatDate(r.class_date, { month: 'short', day: 'numeric' })}</td>
@@ -49,6 +49,9 @@ export default function ReportTable({ records, loading, onExportCSV, onExportPDF
                     <td className="px-5 py-3 text-xs text-slate-400 whitespace-nowrap">{r.section}</td>
                     <td className="px-5 py-3"><Badge status={r.status} /></td>
                     <td className="px-5 py-3 text-xs text-slate-400">{formatTime(r.check_in_time)}</td>
+                    <td className="px-5 py-3 text-xs text-slate-400">
+                      {r.check_out_time ? formatTime(r.check_out_time) : '—'}
+                    </td>
                     <td className="px-5 py-3 text-xs text-slate-400">{r.confidence != null ? `${(r.confidence * 100).toFixed(1)}%` : '—'}</td>
                   </tr>
                 ))}

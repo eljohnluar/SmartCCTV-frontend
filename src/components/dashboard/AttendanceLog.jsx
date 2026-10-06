@@ -110,7 +110,7 @@ function AttendanceLogModal({ records, onClose }) {
 
 export default function AttendanceLog({ records = [], loading = false, open = false, onClose }) {
   const markedRecords = records
-    .filter((record) => record.status === 'present' || record.status === 'late')
+    .filter((record) => record.status === 'present' || record.status === 'late' || record.status === 'time_out')
     .sort((a, b) => new Date(b.check_in_time || 0) - new Date(a.check_in_time || 0))
 
   return (

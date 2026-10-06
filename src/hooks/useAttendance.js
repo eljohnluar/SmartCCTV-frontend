@@ -5,7 +5,7 @@ import { wsClient } from '../services/websocket'
 
 export function useAttendance(date = null) {
   const [attendance, setAttendance] = useState([])
-  const [stats, setStats] = useState({ total: 0, present: 0, late: 0, rate: 0 })
+  const [stats, setStats] = useState({ total: 0, present: 0, late: 0, time_out: 0, rate: 0 })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -62,33 +62,39 @@ export function useAttendance(date = null) {
   useEffect(() => {
     const unsubReset = wsClient.on('attendance_reset', () => {
       setAttendance([])
-      setStats({ total: 0, present: 0, late: 0, rate: 0 })
+      setStats({ total: 0, present: 0, late: 0, time_out: 0, rate: 0 })
     })
     return unsubReset
   }, [])
 
+  // A departure is stamped on the student's existing row, so update in place.
+  useEffect(() => {
+    const unsubTimeOut = wsClient.on('attendance_time_out', (event) => {
+      setAttendance((previous) => {
+        const next = previous.map((item) => (
+          item.student_id === event.student_id
+            ? { ...item, status: 'time_out', check_out_time: event.check_out_time }
+            : item
+        ))
+        setStats(computeStats(next))
+        return next
+      })
+    })
+    return unsubTimeOut
+  }, [])
+
   const markManual = useCallback(async (payload) => {
     const response = await markAttendanceManual(payload)
-    const record = response.record || response
-    setAttendance((prev) => {
-      const idx = prev.findIndex((r) => r.student_id === record.student_id)
-      let next
-      if (idx >= 0) {
-        next = [...prev]
-        next[idx] = record
-      } else {
-        next = [record, ...prev]
-      }
-      setStats(computeStats(next))
-      return next
-    })
-    return record
-  }, [])
+    // Reload instead of merging: the stored record carries no name or section,
+    // and the server-side section scope decides where it belongs.
+    await fetchAttendance()
+    return response.record || response
+  }, [fetchAttendance])
 
   const resetToday = useCallback(async (password) => {
     await resetAttendance(password)
     setAttendance([])
-    setStats({ total: 0, present: 0, late: 0, rate: 0 })
+    setStats({ total: 0, present: 0, late: 0, time_out: 0, rate: 0 })
   }, [])
 
   return { attendance, stats, loading, error, refetch: fetchAttendance, markManual, resetToday }
@@ -98,21 +104,22 @@ function computeStats(records) {
   const total = records.length
   const present = records.filter((r) => r.status === 'present').length
   const late = records.filter((r) => r.status === 'late').length
-  const rate = total > 0 ? Math.round(((present + late) / total) * 100) : 0
-  return { total, present, late, rate }
+  const time_out = records.filter((r) => r.status === 'time_out').length
+  const rate = total > 0 ? Math.round(((present + late + time_out) / total) * 100) : 0
+  return { total, present, late, time_out, rate }
 }
 
 const now = new Date().toISOString()
 
 const MOCK_ATTENDANCE = [
-  { id: 1, student_id: 1, student_name: 'Maria Santos', student_code: 'STU-001', section: 'Section A', status: 'present', check_in_time: now, confidence: 0.97 },
+  { id: 1, student_id: 1, student_name: 'Maria Santos', student_code: 'STU-001', section: 'Section A', status: 'present', check_in_time: now, check_out_time: null, confidence: 0.97 },
   { id: 2, student_id: 2, student_name: 'Juan Dela Cruz', student_code: 'STU-002', section: 'Section A', status: 'late', check_in_time: now, confidence: 0.91 },
   { id: 3, student_id: 3, student_name: 'Ana Reyes', student_code: 'STU-003', section: 'Section B', status: 'present', check_in_time: now, confidence: 0.94 },
   { id: 4, student_id: 4, student_name: 'Carlos Mendoza', student_code: 'STU-004', section: 'Section B', status: 'present', check_in_time: now, confidence: 0.88 },
   { id: 5, student_id: 5, student_name: 'Elena Garcia', student_code: 'STU-005', section: 'Section C', status: 'late', check_in_time: now, confidence: 0.89 },
   { id: 6, student_id: 6, student_name: 'Miguel Torres', student_code: 'STU-006', section: 'Section C', status: 'present', check_in_time: now, confidence: 0.95 },
   { id: 7, student_id: 7, student_name: 'Sofia Ramos', student_code: 'STU-007', section: 'Section A', status: 'present', check_in_time: now, confidence: 0.93 },
-  { id: 8, student_id: 8, student_name: 'Luis Bautista', student_code: 'STU-008', section: 'Section D', status: 'late', check_in_time: now, confidence: 0.84 },
+  { id: 8, student_id: 8, student_name: 'Luis Bautista', student_code: 'STU-008', section: 'Section D', status: 'time_out', check_in_time: now, check_out_time: new Date(Date.now() + 3600000).toISOString(), confidence: 0.84 },
 ]
 
 export default useAttendance

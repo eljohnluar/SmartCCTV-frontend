@@ -15,10 +15,16 @@ function resolveWsUrl() {
     const host = apiBase.replace(/^http/, 'ws').replace(/\/api\/?$/, '').replace(/\/+$/, '')
     return `${host}/ws`
   }
-  return 'ws://localhost:8000/ws'
+  // Same-origin (frontend served by the backend itself)
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+  return `${protocol}//${window.location.host}/ws`
 }
 
 const WS_URL = resolveWsUrl()
+
+const sameScope = (a, b) =>
+  a === b ||
+  (Array.isArray(a) && Array.isArray(b) && a.length === b.length && a.every((value, index) => value === b[index]))
 
 class WSClient {
   constructor() {
@@ -27,6 +33,25 @@ class WSClient {
     this.reconnectDelay = 3000
     this.reconnectTimer = null
     this.shouldReconnect = false
+    this.token = null
+    // Sections this client may see; null means every section.
+    this.sectionScope = null
+  }
+
+  /**
+   * Bind the socket to the signed-in account. The token lets the backend filter
+   * events per connection; sectionScope drops anything that still arrives here.
+   */
+  authorize(token, sectionScope) {
+    const scope = sectionScope === null || sectionScope === undefined ? null : [...sectionScope]
+    const unchanged = token === this.token && sameScope(scope, this.sectionScope)
+    this.token = token
+    this.sectionScope = scope
+    // StrictMode tears the socket down between effect passes, so reconnect
+    // whenever nothing is alive, even if the credential has not changed.
+    if (unchanged && this.ws) return
+    this.disconnect()
+    this.connect()
   }
 
   connect() {
@@ -34,8 +59,12 @@ class WSClient {
 
     this.shouldReconnect = true
 
+    const url = this.token
+      ? `${WS_URL}${WS_URL.includes('?') ? '&' : '?'}token=${encodeURIComponent(this.token)}`
+      : WS_URL
+
     try {
-      this.ws = new WebSocket(WS_URL)
+      this.ws = new WebSocket(url)
 
       this.ws.onopen = () => {
         console.log('[WS] Connected to backend')
@@ -46,6 +75,7 @@ class WSClient {
       this.ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data)
+          if (!this._isVisible(data)) return
           this._emit(data.type || 'message', data)
           this._emit('*', data)
         } catch {
@@ -73,8 +103,21 @@ class WSClient {
   disconnect() {
     this.shouldReconnect = false
     clearTimeout(this.reconnectTimer)
-    this.ws?.close()
-    this.ws = null
+    if (this.ws) {
+      // Drop the handlers so a replaced socket cannot schedule a reconnect.
+      this.ws.onopen = null
+      this.ws.onmessage = null
+      this.ws.onerror = null
+      this.ws.onclose = null
+      this.ws.close()
+      this.ws = null
+    }
+  }
+
+  _isVisible(data) {
+    const tracked = data.type === 'attendance' || data.type === 'attendance_time_out'
+    if (!tracked || this.sectionScope === null) return true
+    return this.sectionScope.includes(data.record?.section ?? data.section)
   }
 
   on(event, callback) {

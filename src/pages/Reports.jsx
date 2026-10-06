@@ -5,14 +5,16 @@ import TrendChart from '../components/reports/TrendChart'
 import DistributionChart from '../components/reports/DistributionChart'
 import ReportFilters from '../components/reports/ReportFilters'
 import ReportTable from '../components/reports/ReportTable'
+import SectionScopeNotice from '../components/common/SectionScopeNotice'
 import { getReportsSummary, getReportsTrend, getReportRecords } from '../services/api'
-import { toISODate, formatDate, formatTime } from '../utils/helpers'
+import { toISODate, formatDate, formatTime, statusLabel } from '../utils/helpers'
 import { yearLevelOfSection } from '../utils/constants'
 
 const MOCK_SUMMARY = {
   avg_rate: 87.5,
   total_present: 142,
   total_late: 12,
+  total_time_out: 3,
   total_students: 154,
 }
 
@@ -27,8 +29,8 @@ const MOCK_TREND = [
 ]
 
 const MOCK_RECORDS = [
-  { id: 101, class_date: '2026-09-06', student_name: 'Maria Santos', section: '1st Year - Section A', status: 'present', check_in_time: '2026-09-06T07:45:00Z', confidence: 0.98 },
-  { id: 102, class_date: '2026-09-06', student_name: 'Juan Dela Cruz', section: '1st Year - Section A', status: 'late', check_in_time: '2026-09-06T08:15:00Z', confidence: 0.92 },
+  { id: 101, class_date: '2026-09-06', student_name: 'Maria Santos', section: '1st Year - Section A', status: 'present', check_in_time: '2026-09-06T07:45:00Z', check_out_time: '2026-09-06T16:05:00Z', confidence: 0.98 },
+  { id: 102, class_date: '2026-09-06', student_name: 'Juan Dela Cruz', section: '1st Year - Section A', status: 'time_out', check_in_time: '2026-09-06T08:15:00Z', check_out_time: '2026-09-06T17:40:00Z', confidence: 0.92 },
   { id: 103, class_date: '2026-09-06', student_name: 'Carlos Mendoza', section: '2nd Year - Section B', status: 'present', check_in_time: '2026-09-06T07:50:00Z', confidence: 0.94 },
   { id: 104, class_date: '2026-09-06', student_name: 'Ana Reyes', section: '2nd Year - Section C', status: 'present', check_in_time: '2026-09-06T07:52:00Z', confidence: 0.95 },
   { id: 105, class_date: '2026-09-06', student_name: 'Miguel Torres', section: '3rd Year - Section C', status: 'present', check_in_time: '2026-09-06T07:55:00Z', confidence: 0.96 },
@@ -99,7 +101,7 @@ export default function Reports() {
 
   const handleExportCSV = async () => {
     try {
-      const headers = ['Date', 'Student ID', 'Student Name', 'Section', 'Status', 'Check-in Time', 'Confidence']
+      const headers = ['Date', 'Student ID', 'Student Name', 'Section', 'Status', 'Time In', 'Time Out', 'Confidence']
       const rows = records.map(r => [
         r.class_date,
         r.student_code || '',
@@ -107,6 +109,7 @@ export default function Reports() {
         r.section,
         r.status,
         r.check_in_time || 'N/A',
+        r.check_out_time || 'N/A',
         r.confidence ? `${(r.confidence * 100).toFixed(1)}%` : 'N/A'
       ])
       const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n')
@@ -140,8 +143,9 @@ export default function Reports() {
         <td>${escapeHtml(r.student_code || '')}</td>
         <td>${escapeHtml(r.student_name)}</td>
         <td>${escapeHtml(r.section)}</td>
-        <td>${escapeHtml(r.status)}</td>
+        <td>${escapeHtml(statusLabel(r.status))}</td>
         <td>${escapeHtml(r.check_in_time ? formatTime(r.check_in_time) : '—')}</td>
+        <td>${escapeHtml(r.check_out_time ? formatTime(r.check_out_time) : '—')}</td>
         <td>${r.confidence != null ? escapeHtml(`${(r.confidence * 100).toFixed(1)}%`) : '—'}</td>
       </tr>`).join('')
 
@@ -169,7 +173,7 @@ export default function Reports() {
   <p class="meta">Generated on ${escapeHtml(new Date().toLocaleString())} · ${records.length} record${records.length === 1 ? '' : 's'}</p>
   <table>
     <thead>
-      <tr><th>Date</th><th>Student ID</th><th>Student</th><th>Section</th><th>Status</th><th>Check-in</th><th>Confidence</th></tr>
+      <tr><th>Date</th><th>Student ID</th><th>Student</th><th>Section</th><th>Status</th><th>Time in</th><th>Time out</th><th>Confidence</th></tr>
     </thead>
     <tbody>${rows}</tbody>
   </table>
@@ -182,6 +186,8 @@ export default function Reports() {
 
   return (
     <div className="space-y-6">
+      <SectionScopeNotice />
+
       <ReportFilters filters={filters} onChange={setFilters} />
 
       <SummaryCards summary={summary} loading={loading} />
@@ -192,6 +198,7 @@ export default function Reports() {
           data={{
             present: summary.total_present,
             late: summary.total_late,
+            time_out: summary.total_time_out,
           }}
           loading={loading}
         />

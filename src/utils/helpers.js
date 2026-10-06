@@ -1,4 +1,9 @@
-import { ATTENDANCE_STATUS, CONFIDENCE_THRESHOLDS } from './constants'
+import { ATTENDANCE_STATUS, ATTENDANCE_STATUS_LABELS, CONFIDENCE_THRESHOLDS } from './constants'
+
+/**
+ * Display text for a stored attendance status, e.g. 'time_out' -> 'Time out'
+ */
+export const statusLabel = (status) => ATTENDANCE_STATUS_LABELS[status] ?? status
 
 /**
  * Format a date string to a readable format
@@ -59,6 +64,13 @@ export const statusColors = (status) => {
         text: 'text-amber-400',
         border: 'border-amber-500/30',
         dot: 'bg-amber-400',
+      }
+    case ATTENDANCE_STATUS.TIME_OUT:
+      return {
+        bg: 'bg-rose-500/10',
+        text: 'text-rose-400',
+        border: 'border-rose-500/30',
+        dot: 'bg-rose-400',
       }
     default:
       return {

@@ -16,7 +16,6 @@ const CAPTURE_STEPS = [
 
 export default function FaceEnrollment({ open, onClose, student }) {
   const videoRef = useRef(null)
-  const virtualImageRef = useRef(null)
   const canvasRef = useRef(null)
   const streamRef = useRef(null)
   const [cameraSource, setCameraSource] = useState('webcam')
@@ -69,24 +68,61 @@ export default function FaceEnrollment({ open, onClose, student }) {
     }
   }, [cameraSource, isBackendStream])
 
-  const capture = () => {
+  const capture = async () => {
     if (!activeStep) return
     const canvas = canvasRef.current
-    const source = isBackendStream ? virtualImageRef.current : videoRef.current
-    if (!canvas || !source) return
+    if (!canvas) return
 
-    const width = isBackendStream ? source.naturalWidth : source.videoWidth
-    const height = isBackendStream ? source.naturalHeight : source.videoHeight
+    let source
+    let width
+    let height
+    if (isBackendStream) {
+      // The MJPEG preview is a cross-origin image, and drawing it taints the
+      // canvas so toDataURL() throws. Take the same frame from the backend
+      // instead: a fetched blob is same-origin and stays exportable.
+      try {
+        const response = await fetch(`${API_BASE_URL}/camera/snapshot`, { cache: 'no-store' })
+        if (!response.ok) throw new Error(`Camera snapshot returned ${response.status}`)
+        source = await createImageBitmap(await response.blob())
+        width = source.width
+        height = source.height
+      } catch (error) {
+        toast.error('The camera frame could not be captured. Start the camera feed and try again.')
+        console.error('[FaceEnrollment] Snapshot capture failed:', error)
+        return
+      }
+    } else {
+      source = videoRef.current
+      width = source?.videoWidth
+      height = source?.videoHeight
+    }
+
     if (!width || !height) {
+      source?.close?.()
       toast.error('Wait for the camera image to load before capturing.')
       return
     }
+
+    const context = canvas.getContext('2d')
+    if (!context) {
+      source?.close?.()
+      return
+    }
+
     canvas.width = width
     canvas.height = height
-    const context = canvas.getContext('2d')
-    if (!context) return
-    context.drawImage(source, 0, 0, width, height)
-    const image = canvas.toDataURL('image/jpeg', 0.9)
+    let image
+    try {
+      context.drawImage(source, 0, 0, width, height)
+      image = canvas.toDataURL('image/jpeg', 0.9)
+    } catch (error) {
+      toast.error('The camera image could not be captured by this browser.')
+      console.error('[FaceEnrollment] Canvas capture failed:', error)
+      return
+    } finally {
+      source?.close?.()
+    }
+
     setCaptures((previous) => ({ ...previous, [activeStep.id]: image }))
     if (captureCount + 1 === CAPTURE_STEPS.length) stopCamera()
   }
@@ -153,7 +189,7 @@ export default function FaceEnrollment({ open, onClose, student }) {
             <div className="relative flex aspect-video items-center justify-center overflow-hidden rounded-xl bg-[#0f1117]">
               {!streaming && <div className="px-5 text-center text-slate-600">{sourceError ? <p className="text-sm text-red-300">{sourceError}</p> : <><Camera size={32} className="mx-auto mb-2" /><p className="text-sm">Camera not started</p></>}</div>}
               <video ref={videoRef} autoPlay playsInline muted className={`h-full w-full object-cover ${cameraSource === 'webcam' && streaming ? 'block' : 'hidden'}`} />
-              <img ref={virtualImageRef} src={isBackendStream && streaming ? `${virtualCameraStream}?enrollment=${student?.id ?? 'face'}&refresh=${virtualStreamKey}` : undefined} alt={`${sourceLabel} enrollment preview`} onError={() => { setStreaming(false); setSourceError(`${sourceLabel} is unavailable. Start the camera feed, then try again.`) }} className={`h-full w-full object-cover ${isBackendStream && streaming ? 'block' : 'hidden'}`} />
+              <img src={isBackendStream && streaming ? `${virtualCameraStream}?enrollment=${student?.id ?? 'face'}&refresh=${virtualStreamKey}` : undefined} alt={`${sourceLabel} enrollment preview`} onError={() => { setStreaming(false); setSourceError(`${sourceLabel} is unavailable. Start the camera feed, then try again.`) }} className={`h-full w-full object-cover ${isBackendStream && streaming ? 'block' : 'hidden'}`} />
               <canvas ref={canvasRef} className="hidden" />
             </div>
           </>
@@ -163,7 +199,7 @@ export default function FaceEnrollment({ open, onClose, student }) {
 
         <div className="grid grid-cols-4 gap-2">
           {CAPTURE_STEPS.map((step) => (
-            <button key={step.id} onClick={() => captures[step.id] && retake(step.id)} disabled={!captures[step.id] || enrolling} className={`relative aspect-square overflow-hidden rounded-lg border text-[10px] transition-colors ${captures[step.id] ? 'border-emerald-400/40 hover:border-emerald-300' : 'border-[#2d3148] bg-[#172235] text-slate-500'} disabled:cursor-default`}>
+            <button key={step.id} onClick={() => captures[step.id] && retake(step.id)} disabled={!captures[step.id] || enrolling} title={captures[step.id] ? `Retake the ${step.label.toLowerCase()} capture` : `Waiting for the ${step.label.toLowerCase()} capture — use the capture button below`} className={`relative aspect-square overflow-hidden rounded-lg border text-[10px] transition-colors ${captures[step.id] ? 'border-emerald-400/40 hover:border-emerald-300' : 'border-[#2d3148] bg-[#172235] text-slate-500'} disabled:cursor-default`}>
               {captures[step.id] ? <img src={captures[step.id]} alt={`${step.label} face capture`} className="h-full w-full object-cover" /> : <span>{step.label}</span>}
               {captures[step.id] && <span className="absolute inset-x-0 bottom-0 bg-black/65 py-1 text-white">{step.label} · Retake</span>}
             </button>

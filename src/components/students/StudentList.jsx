@@ -1,8 +1,7 @@
 import { Download, Edit2, Printer, Scan, Search, Trash2, UserPlus } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
-import { useAuth } from '../../context/AuthContext'
-import { assignableSections } from '../../utils/constants'
+import { useSectionScope } from '../../hooks/useSectionScope'
 import { getInitials } from '../../utils/helpers'
 import LoadingSpinner from '../common/LoadingSpinner'
 
@@ -14,18 +13,17 @@ const escapeHtml = (value) =>
     .replace(/"/g, '&quot;')
 
 export default function StudentList({ students, loading, onAdd, onEdit, onDelete, onEnroll }) {
-  const { user } = useAuth()
+  const { assignedSections } = useSectionScope()
   const [search, setSearch] = useState('')
   const [sectionFilter, setSectionFilter] = useState('')
 
   const sections = useMemo(() => {
-    const scoped = assignableSections(user?.year_levels, user?.sections)
     const legacy = [...new Set(students.map((s) => s.section).filter(Boolean))]
-    if (scoped.length > 0) {
-      return [...scoped, ...legacy.filter((s) => !scoped.includes(s))]
+    if (assignedSections.length > 0) {
+      return [...assignedSections, ...legacy.filter((s) => !assignedSections.includes(s))]
     }
     return legacy
-  }, [students, user?.year_levels, user?.sections])
+  }, [students, assignedSections])
 
   const filtered = useMemo(() => students.filter((s) => {
     const matchSearch = s.full_name?.toLowerCase().includes(search.toLowerCase()) ||

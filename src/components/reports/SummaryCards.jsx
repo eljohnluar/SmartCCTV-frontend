@@ -3,12 +3,13 @@ import { TrendingDown, TrendingUp, UserCheck, UserMinus, Users } from 'lucide-re
 export default function SummaryCards({ summary, loading }) {
   const cards = [
     { label: 'Average Rate', value: `${summary?.avg_rate ?? 0}%`, icon: TrendingUp, color: 'text-green-400', bg: 'bg-green-500/10' },
-    { label: 'Total Present', value: summary?.total_present ?? 0, icon: UserCheck, color: 'text-green-400', bg: 'bg-green-500/10' },
-    { label: 'Total Late', value: summary?.total_late ?? 0, icon: TrendingDown, color: 'text-amber-400', bg: 'bg-amber-500/10' },
+    { label: 'Time In', value: summary?.total_present ?? 0, icon: UserCheck, color: 'text-green-400', bg: 'bg-green-500/10' },
+    { label: 'Late', value: summary?.total_late ?? 0, icon: TrendingDown, color: 'text-amber-400', bg: 'bg-amber-500/10' },
+    { label: 'Time Out', value: summary?.total_time_out ?? 0, icon: UserMinus, color: 'text-rose-400', bg: 'bg-rose-500/10' },
     { label: 'Total Students', value: summary?.total_students ?? 0, icon: Users, color: 'text-slate-400', bg: 'bg-slate-500/10' },
   ]
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
       {cards.map(({ label, value, icon: Icon, color, bg }) => (
         <div key={label} className="bg-[#1a1d27] border border-[#2d3148] rounded-xl p-4">
           <div className={`inline-flex p-2 rounded-lg ${bg} mb-3`}>

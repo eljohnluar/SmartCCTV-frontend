@@ -29,6 +29,15 @@ export const API_ROUTES = {
 export const ATTENDANCE_STATUS = {
   PRESENT: 'present',
   LATE: 'late',
+  TIME_OUT: 'time_out',
+}
+
+// How each stored status reads on screen
+export const ATTENDANCE_STATUS_LABELS = {
+  [ATTENDANCE_STATUS.PRESENT]: 'Time in',
+  [ATTENDANCE_STATUS.LATE]: 'Late',
+  [ATTENDANCE_STATUS.TIME_OUT]: 'Time out',
+  absent: 'Absent',
 }
 
 // College year levels
@@ -44,7 +53,8 @@ export const COLLEGE_SECTIONS = YEAR_LEVELS.flatMap((year) => SECTION_LETTERS.ma
 
 /**
  * Sections a teacher may assign students to, from their year levels and letters.
- * An empty result means the account has no restriction.
+ * An empty result means the account has no section access yet, so a teacher with
+ * a partial or missing assignment sees nothing until an administrator finishes it.
  */
 export function assignableSections(yearLevels, letters) {
   if (!yearLevels?.length || !letters?.length) return []

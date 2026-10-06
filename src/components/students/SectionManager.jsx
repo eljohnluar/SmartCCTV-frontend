@@ -1,11 +1,9 @@
-import { useAuth } from '../../context/AuthContext'
-import { assignableSections, COLLEGE_SECTIONS, YEAR_LEVELS } from '../../utils/constants'
+import { useSectionScope } from '../../hooks/useSectionScope'
+import { YEAR_LEVELS } from '../../utils/constants'
 
 export default function SectionManager({ section, gradeLevel, onSectionChange, onGradeLevelChange }) {
-  const { user } = useAuth()
-  const scopedSections = assignableSections(user?.year_levels, user?.sections)
-  const allowed = scopedSections.length > 0 ? scopedSections : COLLEGE_SECTIONS
-  const yearSections = gradeLevel ? allowed.filter((s) => s.startsWith(gradeLevel)) : allowed
+  const { allowedSections } = useSectionScope()
+  const yearSections = gradeLevel ? allowedSections.filter((s) => s.startsWith(gradeLevel)) : allowedSections
 
   return (
     <div className="flex flex-col sm:flex-row gap-3">

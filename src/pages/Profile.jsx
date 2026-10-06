@@ -92,8 +92,16 @@ export default function Profile() {
         </div>
 
         {sections.length === 0 ? (
-          <p className="rounded-xl border border-emerald-400/20 bg-emerald-400/5 px-4 py-3 text-sm text-emerald-300">
-            Full access — this account can manage every year level and section.
+          <p
+            className={`rounded-xl px-4 py-3 text-sm ${
+              user?.role === 'teacher'
+                ? 'border border-amber-400/20 bg-amber-400/5 text-amber-200'
+                : 'border border-emerald-400/20 bg-emerald-400/5 text-emerald-300'
+            }`}
+          >
+            {user?.role === 'teacher'
+              ? 'No sections are assigned to your account yet. Ask an administrator to assign your year levels and sections.'
+              : 'Full access — this account can manage every year level and section.'}
           </p>
         ) : (
           <>

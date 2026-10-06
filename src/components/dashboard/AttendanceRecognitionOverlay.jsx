@@ -202,7 +202,17 @@ export default function AttendanceRecognitionOverlay({ recognition, onClose }) {
           <div className="flex w-full flex-col items-center px-6 pb-5 pt-3 sm:px-8">
             {/* Confirmed badge */}
             <div className="mb-3 flex items-center gap-2">
-              {recognition.status === 'late' ? (
+              {recognition.status === 'time_out' ? (
+                <>
+                  <Clock3 size={16} className="text-rose-400" />
+                  <span
+                    className="font-mono text-[11px] font-semibold uppercase tracking-[0.25em] text-rose-400 sm:text-xs"
+                    style={{ textShadow: '0 0 10px rgba(244,63,94,0.65)' }}
+                  >
+                    Attendance Marked · Time Out
+                  </span>
+                </>
+              ) : recognition.status === 'late' ? (
                 <>
                   <Clock3 size={16} className="text-amber-400" />
                   <span

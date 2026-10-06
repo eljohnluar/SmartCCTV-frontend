@@ -1,6 +1,7 @@
 import {
   AlertTriangle,
   BarChart3,
+  CalendarCheck,
   ChevronLeft,
   ChevronRight,
   LayoutDashboard,
@@ -16,6 +17,7 @@ import { useAuth } from '../../context/AuthContext'
 
 const navItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/attendance', label: 'Attendance', icon: CalendarCheck },
   { to: '/live', label: 'Live Feed', icon: Video },
   { to: '/students', label: 'Students', icon: Users },
   { to: '/reports', label: 'Reports', icon: BarChart3 },

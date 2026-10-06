@@ -1,5 +1,6 @@
 import { useAttendance } from '../hooks/useAttendance'
 import { usePasswordConfirm } from '../hooks/usePasswordConfirm'
+import SectionScopeNotice from '../components/common/SectionScopeNotice'
 import StatsCards from '../components/dashboard/StatsCards'
 import AttendanceTable from '../components/dashboard/AttendanceTable'
 import QuickActions from '../components/dashboard/QuickActions'
@@ -21,6 +22,8 @@ export default function Dashboard() {
     <>
       {dialog}
       <div className="mx-auto max-w-[1600px] space-y-6 pb-8">
+        <SectionScopeNotice />
+
         <StatsCards stats={stats} loading={loading} />
 
         <AttendanceTable records={attendance} loading={loading} />

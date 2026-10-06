@@ -1,4 +1,4 @@
-import { Clock, TrendingDown, TrendingUp, UserCheck, Users } from 'lucide-react'
+import { Clock, TrendingDown, TrendingUp, UserCheck, UserMinus, Users } from 'lucide-react'
 
 const cards = [
   {
@@ -13,7 +13,7 @@ const cards = [
   },
   {
     key: 'present',
-    label: 'Present Today',
+    label: 'Time In',
     icon: UserCheck,
     color: 'text-green-400',
     bg: 'bg-green-500/10',
@@ -23,13 +23,23 @@ const cards = [
   },
   {
     key: 'late',
-    label: 'Late Today',
+    label: 'Late',
     icon: Clock,
     color: 'text-amber-400',
     bg: 'bg-amber-500/10',
     getValue: (s) => s.late,
     sub: (s) => s.late > 0 ? `${s.late} past 30m grace` : 'None today',
     subColor: () => 'text-amber-400',
+  },
+  {
+    key: 'time_out',
+    label: 'Time Out',
+    icon: UserMinus,
+    color: 'text-rose-400',
+    bg: 'bg-rose-500/10',
+    getValue: (s) => s.time_out ?? 0,
+    sub: (s) => (s.time_out ?? 0) > 0 ? 'Left after the Time out' : 'None today',
+    subColor: (s) => ((s.time_out ?? 0) > 0 ? 'text-rose-400' : 'text-slate-500'),
   },
   {
     key: 'total',
@@ -45,7 +55,7 @@ const cards = [
 
 export default function StatsCards({ stats, loading }) {
   return (
-    <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
       {cards.map(({ key, label, icon: Icon, color, bg, getValue, sub, subColor }) => (
         <div key={key} className="min-h-40 rounded-2xl border border-[#263449] bg-[#111a27]/80 p-5 transition-transform duration-200 hover:-translate-y-0.5 hover:border-[#3b536f]">
           <div className="mb-4 flex items-start justify-between">

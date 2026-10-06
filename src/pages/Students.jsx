@@ -6,6 +6,7 @@ import { usePasswordConfirm } from '../hooks/usePasswordConfirm'
 import StudentList from '../components/students/StudentList'
 import StudentForm from '../components/students/StudentForm'
 import FaceEnrollment from '../components/students/FaceEnrollment'
+import SectionScopeNotice from '../components/common/SectionScopeNotice'
 
 export default function Students() {
   const { user } = useAuth()
@@ -54,6 +55,7 @@ export default function Students() {
   return (
     <div className="space-y-6">
       {dialog}
+      <SectionScopeNotice />
       {scopeSummary && (
         <p className="text-xs text-slate-500 -mb-3">Your sections: {scopeSummary}</p>
       )}

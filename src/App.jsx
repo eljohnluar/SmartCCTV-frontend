@@ -8,6 +8,7 @@ import AdminHeader from './components/common/AdminHeader'
 import NotificationToast from './components/common/NotificationToast'
 
 import Dashboard from './pages/Dashboard'
+import Attendance from './pages/Attendance'
 import LiveCamera from './pages/LiveCamera'
 import Students from './pages/Students'
 import Profile from './pages/Profile'
@@ -84,6 +85,8 @@ function AppLayout() {
     switch (pathname) {
       case '/':
         return 'Attendance Dashboard'
+      case '/attendance':
+        return 'Attendance'
       case '/live':
         return 'Live Camera Feed'
       case '/profile':
@@ -111,6 +114,7 @@ function AppLayout() {
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-7">
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/attendance" element={<Attendance />} />
             <Route path="/live" element={<LiveCamera />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/students" element={<Students />} />

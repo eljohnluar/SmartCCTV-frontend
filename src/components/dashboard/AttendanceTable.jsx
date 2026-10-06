@@ -41,8 +41,9 @@ export default function AttendanceTable({ records, loading }) {
               className="text-xs bg-transparent text-slate-300 focus:outline-none cursor-pointer"
             >
               <option value="all">All</option>
-              <option value="present">Present</option>
+              <option value="present">Time in</option>
               <option value="late">Late</option>
+              <option value="time_out">Time out</option>
             </select>
           </div>
         </div>
@@ -56,7 +57,7 @@ export default function AttendanceTable({ records, loading }) {
           <table className="w-full">
             <thead>
               <tr className="border-b border-[#263449] bg-[#0d1521]/50">
-                {['Student', 'ID', 'Section', 'Status', 'Check-in', 'Confidence'].map((h) => (
+                {['Student', 'ID', 'Section', 'Status', 'Time in', 'Time out', 'Confidence'].map((h) => (
                   <th key={h} className="px-5 py-3 text-left text-xs font-medium text-slate-500">{h}</th>
                 ))}
               </tr>
@@ -64,7 +65,7 @@ export default function AttendanceTable({ records, loading }) {
             <tbody className="divide-y divide-[#263449]">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-5 py-10 text-center text-sm text-slate-600">
+                  <td colSpan={7} className="px-5 py-10 text-center text-sm text-slate-600">
                     No records found
                   </td>
                 </tr>
@@ -83,6 +84,9 @@ export default function AttendanceTable({ records, loading }) {
                     <td className="px-5 py-3 text-xs text-slate-400 whitespace-nowrap">{r.section}</td>
                     <td className="px-5 py-3"><Badge status={r.status} /></td>
                     <td className="px-5 py-3 text-xs text-slate-400">{formatTime(r.check_in_time)}</td>
+                    <td className="px-5 py-3 text-xs text-slate-400">
+                      {r.check_out_time ? formatTime(r.check_out_time) : '—'}
+                    </td>
                     <td className="px-5 py-3 text-xs text-slate-400">
                       {r.confidence != null ? `${(r.confidence * 100).toFixed(1)}%` : '—'}
                     </td>

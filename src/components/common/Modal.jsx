@@ -25,9 +25,9 @@ export default function Modal({ open, onClose, title, children, size = 'md' }) {
         onClick={onClose}
       />
       {/* Panel */}
-      <div className={`relative w-full ${widths[size]} bg-[#1a1d27] border border-[#2d3148] rounded-2xl shadow-2xl z-10`}>
+      <div className={`relative flex max-h-[calc(100dvh-2rem)] w-full flex-col ${widths[size]} bg-[#1a1d27] border border-[#2d3148] rounded-2xl shadow-2xl z-10`}>
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#2d3148]">
+        <div className="flex shrink-0 items-center justify-between px-6 py-4 border-b border-[#2d3148]">
           <h2 className="text-base font-semibold text-white">{title}</h2>
           <button
             onClick={onClose}
@@ -38,7 +38,7 @@ export default function Modal({ open, onClose, title, children, size = 'md' }) {
           </button>
         </div>
         {/* Body */}
-        <div className="px-6 py-5">{children}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">{children}</div>
       </div>
     </div>
   )
