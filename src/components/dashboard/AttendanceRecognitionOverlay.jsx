@@ -1,4 +1,5 @@
 import { CheckCircle2, Clock3, Shield, X } from 'lucide-react'
+import { apiAssetUrl } from '../../utils/helpers'
 
 function formatTime(timestamp) {
   return new Intl.DateTimeFormat(undefined, {
@@ -12,6 +13,7 @@ export default function AttendanceRecognitionOverlay({ recognition, onClose }) {
   if (!recognition) return null
 
   const initial = (recognition.student_name || '?').slice(0, 1).toUpperCase()
+  const photoUrl = apiAssetUrl(recognition.enrollment_photo_url)
   const confidence = recognition.confidence
     ? `${(recognition.confidence * 100).toFixed(1)}%`
     : null
@@ -156,9 +158,9 @@ export default function AttendanceRecognitionOverlay({ recognition, onClose }) {
               <div className="flex h-full w-full items-center justify-center bg-[#0d221b] text-7xl font-bold text-emerald-300 sm:text-8xl">
                 {initial}
               </div>
-              {recognition.enrollment_photo_url && (
+              {photoUrl && (
                 <img
-                  src={recognition.enrollment_photo_url}
+                  src={photoUrl}
                   alt={`${recognition.student_name}'s photo`}
                   onError={(e) => {
                     e.currentTarget.style.display = 'none'

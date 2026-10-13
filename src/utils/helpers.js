@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '../services/api'
 import { ATTENDANCE_STATUS, ATTENDANCE_STATUS_LABELS, CONFIDENCE_THRESHOLDS } from './constants'
 
 /**
@@ -138,3 +139,17 @@ export const todayLabel = () =>
     month: 'long',
     day: 'numeric',
   })
+
+/**
+ * Resolve an API-relative asset path such as '/api/students/7/enrollment-photo'
+ * against the configured backend origin.
+ *
+ * The backend sends root-relative paths, which only reach it while a dev proxy
+ * happens to forward /api. A packaged build served from another origin needs the
+ * absolute URL, otherwise the image silently fails.
+ */
+export const apiAssetUrl = (path) => {
+  if (!path) return ''
+  if (/^https?:\/\//i.test(path) || path.startsWith('data:')) return path
+  return `${API_BASE_URL}${path.replace(/^\/api(?=\/|$)/, '')}`
+}

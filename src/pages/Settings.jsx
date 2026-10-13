@@ -13,7 +13,7 @@ const defaultSettings = {
   enrollmentCamera: 'webcam',
   rtspUrl: '',
   enrollmentRtspUrl: '',
-  recognitionThreshold: 0.45,
+  recognitionThreshold: 0.55,
   recognitionModel: 'Facenet',
   voiceLanguage: 'en',
   announcerEnabled: true,
